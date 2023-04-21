@@ -1,2 +1,2 @@
-# hisaab-app
-A web app for bookkeeping
+# fincheck-app
+A web app for online accounting

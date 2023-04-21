@@ -3,7 +3,12 @@ import datetime
 from sqlalchemy import create_engine, text
 from utils import get_cp, get_pqty, calc_updated_sales
 
-conn_string = os.environ['DB_CONNECTION_STRING']
+host = os.environ["HOST"]
+username =os.environ["USERNAME"]
+password = os.environ["PASSWORD"]
+database = os.environ["DATABASE"]
+  
+conn_string = f"mysql+pymysql://{username}:{password}@{host}/{database}"
 
 engine = create_engine(conn_string, connect_args = {
   "ssl":{
