@@ -12,10 +12,19 @@
     <link href="/static/css/dashboard.css" rel="stylesheet">
   </head>
   <body>
-    
     {% include 'dash_nav.html' %} 
-    
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="dashboardSection">
+      <!-- To intimidate whether password is changed successfully or not -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+              {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                      <h6 class="text-center">{{ message }}</h6>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+              {% endfor %}
+          {% endif %}
+      {% endwith %}
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Dashboard</h1>
         <div class="btn-toolbar mb-2 mb-md-0">

@@ -16,18 +16,31 @@ engine = create_engine(conn_string, connect_args = {
   }
 })
 
-def add_user(uname, upass, company):
+def add_user(uname, upass, company, email):
   with engine.connect() as conn:
-    query = text("INSERT INTO users(uname, upass, company) VALUES (:uname, :upass, :company)")
+    query = text("INSERT INTO users(uname, upass, company, email) VALUES (:uname, :upass, :company, :email)")
     conn.execute(query,
                  {
                   'uname': uname, 
                   'upass': upass, 
                   'company': company,
+                  'email': email,
                   'onboarded': datetime.datetime.now()
                  }
     )
     return True
+
+def change_password(uid, upass):
+  with engine.connect() as conn:
+    query = text("UPDATE users SET upass= :upass where uid= :uid")
+    conn.execute(query,
+                 { 
+                  'uid': uid, 
+                  'upass': upass
+                 }
+    )
+    return True
+
 
 def load_users():
   with engine.connect() as conn:

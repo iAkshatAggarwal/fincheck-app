@@ -6,14 +6,19 @@ def authenticate_user(users, username, password):
   for user in users:
     # users is a list of dictionary
     if user['uname'] == username and user['upass'] == password:
-      return user['uid'], user['company']
+      return user['uid'], user['company'], user['uname']
   return None, None
 
 def check_existing_user(users, username, company):
   for user in users:
-    if user['uname'] == username or user['company'] == company:
+    if user['uname'] == username or username == "" or user['company'] == company or company == "":
       return False
   return True
+
+def get_pass_from_uid(users, uid):
+  for user in users:
+    if user['uid'] == uid:
+      return user["upass"]
 
 def get_interval_dates(interval, datas):
   end_date =  date.today()
