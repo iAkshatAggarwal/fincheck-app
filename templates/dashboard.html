@@ -1,228 +1,347 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>FinCheck: Dashboard</title>
-    <link rel="shortcut icon" href="/static/shark.png">
-    {% include 'bootstrap.html' %}
-    <style>
+{% extends 'base.html' %}
+
+{% block head %}
+  <title>FinCheck: Dashboard</title>
+  <style>
       .sidebar #dashboard {
       color: #2470dc;
     }
-    </style>
-    <link href="/static/css/dashboard.css" rel="stylesheet">
-  </head>
-  <body>
-    {% include 'dash_nav.html' %} 
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="dashboardSection">
-      <!-- To intimidate whether password is changed successfully or not -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-              {% for category, message in messages %}
-                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                      <h6 class="text-center">{{ message }}</h6>
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>
-              {% endfor %}
-          {% endif %}
-      {% endwith %}
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Dashboard</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadAsXLSX()">Share</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="exportButton">Export</button>
-          </div>
-          <div class="dropdown">
-            <button id="dropdownButton" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span data-feather="calendar" class="align-text-bottom"></span>
-              <span id="dropdownSelected">Today</span>
-            </button>
-            <ul class="dropdown-menu" id="dropdownMenu">
-              <li><a class="dropdown-item" href="/dashboard/today">Today</a></li>
-              <li><a class="dropdown-item" href="/dashboard/thisweek">This week</a></li>
-              <li><a class="dropdown-item" href="/dashboard/thismonth">This month</a></li>
-              <li><a class="dropdown-item" href="/dashboard/thisquarter">This quarter</a></li>
-              <li><a class="dropdown-item" href="/dashboard/thisyear">This year</a></li>
-              <li><a class="dropdown-item" href="/dashboard/alltime">All time</a></li>
-            </ul>
+  </style>
+{% endblock %}
+
+{% block main %}
+  <!-- To intimidate whether password is changed successfully or not -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+          {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                  <h6 class="text-center">{{ message }}</h6>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+          {% endfor %}
+      {% endif %}
+  {% endwith %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadAsXLSX()">Share</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportButton">Export</button>
+      </div>
+      <div class="dropdown">
+        <button id="dropdownButton" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <span data-feather="calendar" class="align-text-bottom"></span>
+          <span id="dropdownSelected">Today</span>
+        </button>
+        <ul class="dropdown-menu" id="dropdownMenu">
+          <li><a class="dropdown-item" href="/dashboard/today">Today</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thisweek">This week</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thismonth">This month</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thisquarter">This quarter</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thisyear">This year</a></li>
+          <li><a class="dropdown-item" href="/dashboard/alltime">All time</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!--Cards -->
+  <div class="row mb-4 row-cols-1 row-cols-md-3 mt-5 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Gross Revenue</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{g_revenue}}</h4>
           </div>
         </div>
       </div>
-      <!--Cards -->
-      <div class="row mb-4 row-cols-1 row-cols-md-3 mt-5 text-center">
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">Gross Revenue</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{g_revenue}}</h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">Gross Margin</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{g_margin}} ({{perc_gmargin}})</h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">Gross Expenditure</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{g_expenses}}</h4>
-              </div>
-            </div>
-          </div>
-      </div>
-      <div class="row mb-4 row-cols-1 row-cols-md-3 text-center">
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">Net Revenue</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{n_revenue}}</h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">COGS</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{cogs}}</h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">EBITDA</h3>
-                <h4 class="text-muted fw-light">{{ebitda}}</h4>
-              </div>
-            </div>
-          </div>
-      </div>
-<!--       Prediction -->
-      <div class="row mb-5 row-cols-1 row-cols-md-3 text-center">
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">Revenue Forecast</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{p_revenue}}</h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">Profit Forecast</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{p_profit}}</h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-              <div class="card-body">
-                <h3 class="card-title pricing-card-title">Inventory Cost</h3>
-                <h4 class="text-muted fw-light">&#x20b9;{{inventory_cost}}</h4>
-              </div>
-            </div>
-          </div>
-      </div>
-      <div class="row row-cols-1 row-cols-md-2">
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title pricing-card-title"> Monthly Sales </h3>
-              <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title pricing-card-title">Daily Sales</h3>
-              <canvas class="my-4 w-100" id="myChart1" width="900" height="380"></canvas>
-            </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Gross Margin</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{g_margin}} ({{perc_gmargin}})</h4>
           </div>
         </div>
       </div>
-      <div class="row row-cols-1 row-cols-md-2 mt-5">
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title pricing-card-title"> Expenses by Category </h3>
-              <canvas class="my-4 w-100" id="myChart2" width="900" height="380"></canvas>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title pricing-card-title"> Daily Expenses </h3>
-              <canvas class="my-4 w-100" id="myChart3" width="900" height="380"></canvas>
-            </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Gross Expenditure</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{g_expenses}}</h4>
           </div>
         </div>
       </div>
-      <div class="row row-cols-1 row-cols-md-2 mt-5">
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title pricing-card-title"> Top Products by Quantity </h3>
-              <div class="table-responsive">
-                <table class="table table-sm mt-2">
-                  <thead>
-                    <tr>
-                      <th scope="col">Product Name</th>
-                      <th scope="col">Quantity</th>
-                      <th scope="col">Profit (INR)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for product_qty in top_products_qty %}
-                    <tr>
-                      <td scope="col">{{product_qty['name']}}</td>
-                      <td scope="col">{{product_qty['qty']}}</td>
-                      <td scope="col">{{product_qty['profit']}}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title pricing-card-title"> Top Products by Profit </h3>
-              <div class="table-responsive">
-                <table class="table table-sm mt-2">
-                  <thead>
-                    <tr>
-                      <th scope="col">Product Name</th>
-                      <th scope="col">Quantity</th>
-                      <th scope="col">Profit (INR)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for product_profit in top_products_qty %}
-                    <tr>
-                      <td scope="col">{{product_profit['name']}}</td>
-                      <td scope="col">{{product_profit['qty']}}</td>
-                      <td scope="col">{{product_profit['profit']}}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+  </div>
+  <div class="row mb-4 row-cols-1 row-cols-md-3 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Net Revenue</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{n_revenue}}</h4>
           </div>
         </div>
       </div>
-    </main>
-    {% include 'script.html' %}
-    {% include 'dash_charts.html' %}
-    <script src="/static/js/dashboard.js"></script>
-  </body>
-</html>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">COGS</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{cogs}}</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">EBITDA</h3>
+            <h4 class="text-muted fw-light">{{ebitda}}</h4>
+          </div>
+        </div>
+      </div>
+  </div>
+  <!-- Prediction -->
+  <div class="row mb-5 row-cols-1 row-cols-md-3 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Revenue Forecast</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{p_revenue}}</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Profit Forecast</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{p_profit}}</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Inventory Cost</h3>
+            <h4 class="text-muted fw-light">&#x20b9;{{inventory_cost}}</h4>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Monthly Sales </h3>
+          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title">Daily Sales</h3>
+          <canvas class="my-4 w-100" id="myChart1" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2 mt-5">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Expenses by Category </h3>
+          <canvas class="my-4 w-100" id="myChart2" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Daily Expenses </h3>
+          <canvas class="my-4 w-100" id="myChart3" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2 mt-5">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Top Products by Quantity </h3>
+          <div class="table-responsive">
+            <table class="table table-sm mt-2">
+              <thead>
+                <tr>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Profit (INR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product_qty in top_products_qty %}
+                <tr>
+                  <td scope="col">{{product_qty['name']}}</td>
+                  <td scope="col">{{product_qty['qty']}}</td>
+                  <td scope="col">{{product_qty['profit']}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Top Products by Profit </h3>
+          <div class="table-responsive">
+            <table class="table table-sm mt-2">
+              <thead>
+                <tr>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Profit (INR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product_profit in top_products_qty %}
+                <tr>
+                  <td scope="col">{{product_profit['name']}}</td>
+                  <td scope="col">{{product_profit['qty']}}</td>
+                  <td scope="col">{{product_profit['profit']}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    feather.replace({ 'aria-hidden': 'true' })
+    // Parse the data embedded in the HTML template
+    var monthly_sales_data = JSON.parse('{{ monthly_sales_data | tojson | safe }}');
+    var daily_sales_data = JSON.parse('{{ daily_sales_data | tojson | safe }}');
+    var category_expenses_data = JSON.parse('{{ category_expenses_data | tojson | safe }}');
+    var daily_expenses_data = JSON.parse('{{ daily_expenses_data | tojson | safe }}');
+    
+    // Create the chart using Chart.js
+    // Monthly Sales Chart
+    var ctx = document.getElementById('myChart').getContext('2d'); 
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthly_sales_data.labels,
+            datasets: [{
+                label: 'Monthly Sales',
+                data: monthly_sales_data.values,
+                backgroundColor: 'rgba(0, 128, 0, 1)',
+                borderColor: 'rgba(0, 128, 0, 0.5)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+  
+    // Daily Sales Chart
+    var ctx1 = document.getElementById('myChart1').getContext('2d');
+    var myChart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: daily_sales_data.labels,
+            datasets: [{
+                label: 'Daily Sales',
+                data: daily_sales_data.values,
+                backgroundColor: 'rgba(20, 70, 200, 1)',
+                borderColor: 'rgba(20, 70, 200, 0.5)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+  
+    // Expenses by Category Chart
+    var ctx2 = document.getElementById('myChart2').getContext('2d');
+    var myChart2 = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+          labels: category_expenses_data.labels,
+          datasets: [{
+              label: 'Category Expenses',
+              data: category_expenses_data.values,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.6)',
+                  'rgba(54, 162, 235, 0.6)',
+                  'rgba(255, 206, 86, 0.6)',
+                  'rgba(75, 192, 192, 0.6)',
+                  'rgba(153, 102, 255, 0.6)',
+                  'rgba(255, 159, 64, 0.6)',
+                  'rgba(255, 99, 132, 0.6)'
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)',
+                  'rgba(255, 99, 132, 1)'
+              ],
+              borderWidth: 1
+          }]
+      },
+      options: {
+          scales: {
+              yAxes: [{
+                  ticks: {
+                      beginAtZero: true
+                  }
+              }]
+          }
+      }
+    });
+  
+    // Daily Expenses Chart
+    var ctx3 = document.getElementById('myChart3').getContext('2d');
+    var myChart3 = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: daily_expenses_data.labels,
+            datasets: [{
+                label: 'Expenses',
+                data: daily_expenses_data.values,
+                backgroundColor: 'rgba(265, 100, 162, 0.2)',
+                borderColor: 'rgba(265, 100, 162, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+  </script>
+{% endblock %}

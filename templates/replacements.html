@@ -1,109 +1,135 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>FinCheck: Replacements</title>
-    <link rel="shortcut icon" href="/static/shark.png">
-    {% include 'bootstrap.html' %}
-    <style>
-      .sidebar #replacements{
-        color: #2470dc;
-      }
-    </style>
-    <link href="/static/css/dashboard.css" rel="stylesheet">
-  </head>
-  <body>
-    {% include 'dash_nav.html' %} 
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="dashboardSection">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Replacements vs Products</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadAsXLSX()">Share</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="exportButton">Export</button>
-          </div>
-          <div class="dropdown">
-            <button id="dropdownButton" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span data-feather="calendar" class="align-text-bottom"></span>
-              <span id="dropdownSelected">Today</span>
-            </button>
-            <ul class="dropdown-menu" id="dropdownMenu">
-              <li><a class="dropdown-item" href="/replacements/today">Today</a></li>
-              <li><a class="dropdown-item" href="/replacements/thisweek">This week</a></li>
-              <li><a class="dropdown-item" href="/replacements/thismonth">This month</a></li>
-              <li><a class="dropdown-item" href="/replacements/thisquarter">This quarter</a></li>
-              <li><a class="dropdown-item" href="/replacements/thisyear">This year</a></li>
-              <li><a class="dropdown-item" href="/replacements/alltime">All time</a></li>
-            </ul>
-          </div>
-        </div>
+{% extends 'base.html' %}
+
+{% block head %}
+  <title>Hisaab: Expenses</title>
+  <style>
+    .sidebar #expenses {
+      color: #2470dc;
+    }
+  </style>
+{% endblock %}
+  
+{% block main %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Replacements vs Products</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadAsXLSX()">Share</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportButton">Export</button>
       </div>
-      <!-- Chart -->
-      <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-body">
-          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
-        </div>
+      <div class="dropdown">
+        <button id="dropdownButton" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <span data-feather="calendar" class="align-text-bottom"></span>
+          <span id="dropdownSelected">Today</span>
+        </button>
+        <ul class="dropdown-menu" id="dropdownMenu">
+          <li><a class="dropdown-item" href="/replacements/today">Today</a></li>
+          <li><a class="dropdown-item" href="/replacements/thisweek">This week</a></li>
+          <li><a class="dropdown-item" href="/replacements/thismonth">This month</a></li>
+          <li><a class="dropdown-item" href="/replacements/thisquarter">This quarter</a></li>
+          <li><a class="dropdown-item" href="/replacements/thisyear">This year</a></li>
+          <li><a class="dropdown-item" href="/replacements/alltime">All time</a></li>
+        </ul>
       </div>
-      <!-- Tables -->
-      <h2>Replacements</h2>
-      <!-- Add to Inventory Form -->
-      <form class="mb-5 mt-4" action="/add_replacement" method="POST">
-        <div class="mx-auto row">
-          <div class="col-md-2">
-            <select id="option" name="pname" class="form-control">
-              {% for product in products %}
-              <option value="{{ product['pname'] }}">
-                {{ product['pname'] }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-2">
-              <input type="text" class="form-control" name="qty" placeholder="Quantity">
-          </div>
-          <div class="col-md-3">
-            <button class="btn btn-success" type="submit">Add Replacement</button>
-          </div>
-        </div>
-      </form>
-      
-      <!-- Show Inventory -->
-      <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive mb-3">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th scope="col">ID</th>
-                  <th scope="col">Replace Date</th>
-                  <th scope="col">Product Name</th>
-                  <th scope="col">Quantity</th>
-                  <th scope="col">Amount (INR)</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for replacement in replacements %}
-                <tr>
-                  <td scope="col" contenteditable="false">{{replacement['rid']}}</td>
-                  <td scope="col" contenteditable="false">{{replacement['date']}}</td>
-                  <td scope="col" contenteditable="false">{{replacement['pname']}}</td>
-                  <td scope="col" contenteditable="false">{{replacement['qty']}}</td>
-                  <td scope="col" contenteditable="false">{{replacement['amt']}}</td>
-                  <td>
-                    <a class="btn btn-outline-primary" href="" role="button" onclick="editRow(this)">Update</a>
-                    <a class="btn btn-outline-success d-none" href="" role="button" onclick="saveRow(this)">Save</a>
-                    <a class="btn btn-outline-danger" href="/replacements/{{replacement['rid']}}/delete" role="button">Delete</a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
+    </div>
+  </div>
+  <!-- Chart -->
+  <div class="card mb-4 rounded-3 shadow-sm">
+    <div class="card-body">
+      <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+    </div>
+  </div>
+  <!-- Tables -->
+  <h2>Replacements</h2>
+  <!-- Add to Inventory Form -->
+  <form class="mb-5 mt-4" action="/add_replacement" method="POST">
+    <div class="mx-auto row">
+      <div class="col-md-2">
+        <select id="option" name="pname" class="form-control">
+          {% for product in products %}
+          <option value="{{ product['pname'] }}">
+            {{ product['pname'] }}
+          </option>
+          {% endfor %}
+        </select>
       </div>
-    </main>
-    {% include 'script.html' %}
-    {% include 'chart.html' %}
-    <script src="/static/js/replacements.js"></script>
-  </body>
-</html>
+      <div class="col-md-2">
+          <input type="text" class="form-control" name="qty" placeholder="Quantity">
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-success" type="submit">Add Replacement</button>
+      </div>
+    </div>
+  </form>
+  
+  <!-- Show Inventory -->
+  <div class="card mb-4 rounded-3 shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive mb-3">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Replace Date</th>
+              <th scope="col">Product Name</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Amount (INR)</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for replacement in replacements %}
+            <tr>
+              <td scope="col" contenteditable="false">{{replacement['rid']}}</td>
+              <td scope="col" contenteditable="false">{{replacement['date']}}</td>
+              <td scope="col" contenteditable="false">{{replacement['pname']}}</td>
+              <td scope="col" contenteditable="false">{{replacement['qty']}}</td>
+              <td scope="col" contenteditable="false">{{replacement['amt']}}</td>
+              <td>
+                <a class="btn btn-outline-primary" href="" role="button" onclick="editRow(this)">Update</a>
+                <a class="btn btn-outline-success d-none" href="" role="button" onclick="saveRow(this)">Save</a>
+                <a class="btn btn-outline-danger" href="/replacements/{{replacement['rid']}}/delete" role="button">Delete</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <!-- For Chart -->
+  <script>
+    feather.replace({ 'aria-hidden': 'true' })
+    // Parse the data embedded in the HTML template
+    var data = JSON.parse('{{ data | tojson | safe }}');
+
+    // Create the chart using Chart.js
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Replacements',
+                data: data.values,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+  </script>
+  <script src="/static/js/replacements.js"></script>
+{% endblock %}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  <link rel="shortcut icon" href="{{url_for('static', filename='/shark.png')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/dashboard.css')}}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+    <button class="navbar-toggler me-0 d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Displaying Company name -->
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#">{{company}}</a>
+    <!-- Nav bar -->
+    <div class="navbar-nav">
+      <div class="nav-item text-nowrap">
+        <!-- Profile button group at top right corner -->
+        <div class="btn-group ">
+          <span class="input-group-text" id="basic-addon1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+            </svg>
+          </span>
+          <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+            <span class="visually-hidden">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="position: absolute; transform: translateX(-10px);">
+            <li><a class="dropdown-item text-muted" href="#">{{username}}</a></li>
+            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#passwordModal" >Change password</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="w-100 btn btn-danger" href="/logout">Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Giving spacing -->
+  <div style="height:49px"></div>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Siderbar Menu  -->
+      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="position-sticky pt-3 sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" id="dashboard" aria-current="page" href="/dashboard/today">
+                <span data-feather="home" class="align-text-bottom"></span>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="sales" href="/sales/thisweek">
+                <span data-feather="file" class="align-text-bottom"></span>
+                Sales
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="products" href="/products">
+                <span data-feather="shopping-cart" class="align-text-bottom"></span>
+                Products
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="customers" href="/customers">
+                <span data-feather="users" class="align-text-bottom"></span>
+                Customers
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="ledgers" href="/ledgers/thisweek">
+                <span data-feather="book" class="align-text-bottom"></span>
+                Ledgers
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="expenses" href="/expenses/thisweek">
+                <span data-feather="bar-chart-2" class="align-text-bottom"></span>
+                Expenses
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="replacements" href="/replacements/thisweek">
+                <span data-feather="layers" class="align-text-bottom"></span>
+                Replacements
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="dashboardSection">
+        {% block main %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  <!-- End of container -->
+  <!-- Change Password Modal -->
+  <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="passwordModalLabel">Change Password</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/change-password" method="POST">
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Old Password:</label>
+              <input type="text" class="form-control" name="old-pass" id="old-pass">
+            </div>
+            <div class="mb-3">
+              <label for="message-text" class="col-form-label">New Password:</label>
+              <input type="password" class="form-control" name="new-pass" id="new-pass">
+            </div>
+            <div class="mb-3">
+              <label for="message-text" class="col-form-label">Confirm New Password:</label>
+              <input type="password" class="form-control" name="re-new-pass" id="re-new-pass">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button class="btn btn-primary" type="submit">Save Changes</button>
+            </div>
+          </form>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js" integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.8/xlsx.full.min.js"></script>
+  <!-- JavaScript code to handle the excel download -->
+  <script>
+  function downloadAsXLSX() {
+    // Create a new workbook
+    var workbook = XLSX.utils.book_new();
+    // Loop through each HTML table and add it as a sheet to the workbook
+    var tables = document.getElementsByTagName("table");
+    for (var i = 0; i < tables.length; i++) {
+      var table = tables[i];
+      var worksheet = XLSX.utils.table_to_sheet(table);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet" + (i + 1));
+    }
+    // Save the workbook as an XLSX file
+    var filename = "tables.xlsx";
+    XLSX.writeFile(workbook, filename);
+  }
+  </script>
+  
+  <!-- JavaScript code to handle the screenshot download -->
+  <script>
+    document.getElementById("exportButton").addEventListener("click", function() {
+      // Capture the desired part of the screen
+      html2canvas(document.getElementById("dashboardSection")).then(function(canvas) {
+        // Convert the canvas to a blob object
+        canvas.toBlob(function(blob) {
+          // Create a download link
+          var link = document.createElement("a");
+          link.download = "screenshot.png";
+          link.href = URL.createObjectURL(blob);
+          // Click the link to trigger the download
+          link.click();
+        });
+      });
+    });
+  </script>
+  
+  <!-- To select the time filter option  -->
+  <script>
+    const dropdownSelected = document.getElementById('dropdownSelected');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    // Get the current URL path
+    const currentPath = window.location.pathname;
+    // Find the matching dropdown item based on the current URL
+    const matchingItem = [...dropdownMenu.children].find(item => {
+      const link = item.querySelector('a');
+      return link && link.getAttribute('href') === currentPath;
+    });
+    // Update the dropdown button text to the matching item
+    if (matchingItem) {
+      dropdownSelected.textContent = matchingItem.querySelector('a').textContent;
+    }
+    dropdownMenu.addEventListener('click', (event) => {
+      // Get the text content of the clicked item
+      const selectedItem = event.target.textContent;
+      // Update the dropdown button text to the selected item
+      dropdownSelected.textContent = selectedItem;
+      // Allow the default link behavior for the selected item
+      const selectedLink = event.target.closest('a');
+      if (selectedLink) {
+        selectedLink.click();
+      }
+    });
+  </script>
+  {% block script %}{% endblock %}
+</body>
+</html>

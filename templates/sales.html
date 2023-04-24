@@ -1,129 +1,153 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>FinCheck: Sales</title>
-    <link rel="shortcut icon" href="/static/shark.png"> 
-    {% include 'bootstrap.html' %}
-    <style>
-      .sidebar #sales {
+{% extends 'base.html' %}
+
+{% block head %}
+  <title>Hisaab: Sales</title>
+  <style>
+    .sidebar #sales {
       color: #2470dc;
     }
-    </style>
-    <link href="/static/css/dashboard.css" rel="stylesheet">
-  </head>
-  <body>
-    {% include 'dash_nav.html' %} 
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="dashboardSection">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Orders</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadAsXLSX()">Share</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="exportButton">Export</button>
-          </div>
-          <div class="dropdown">
-            <button id="dropdownButton" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span data-feather="calendar" class="align-text-bottom"></span>
-              <span id="dropdownSelected">Today</span>
-            </button>
-            <ul class="dropdown-menu" id="dropdownMenu">
-              <li><a class="dropdown-item" href="/sales/today">Today</a></li>
-              <li><a class="dropdown-item" href="/sales/thisweek">This week</a></li>
-              <li><a class="dropdown-item" href="/sales/thismonth">This month</a></li>
-              <li><a class="dropdown-item" href="/sales/thisquarter">This quarter</a></li>
-              <li><a class="dropdown-item" href="/sales/thisyear">This year</a></li>
-              <li><a class="dropdown-item" href="/sales/alltime">All time</a></li>
-            </ul>
-          </div>
-        </div>
+  </style>
+{% endblock %}
+  
+{% block main %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Orders</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadAsXLSX()">Share</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportButton">Export</button>
       </div>
-      <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-body">
-          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
-        </div>
-      </div>
-      <h2>Sales</h2>
-      <!-- Add transaction form -->
-      <form class="mb-5 mt-4" id="sale-form" action="/add_sale" method="POST">
-        <div class="mx-auto row">
-          <div class="col-md-2">
-            <select id="option" name="pname" class="form-control">
-              {% for product in products %}
-              <option value="{{ product['pname'] }}">
-                {{ product['pname'] }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-2">
-              <input type="text" class="form-control" name="qty" id="quantity" placeholder="Quantity">
-          </div>
-          <div class="col-md-2">
-            <input type="text" class="form-control" name="price" id="price" placeholder="Price">
-          </div>
-          <div class="col-md-2">
-            <input type="text" class="form-control" name="customer" id="customer" placeholder="Customer Name">
-          </div>
-          <div class="col-md-1">
-            <select id="status" name="status" class="form-control">
-              <option value="Unpaid">Unpaid</option>
-              <option value="Paid">Paid</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <button class="btn btn-success" id="add-sale-button" type="submit">Add Sale</button>
-          </div>
-        </div>
-      </form>
-      <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th scope="col">ID</th>
-                  <th scope="col">Date</th>
-                  <th scope="col">Product Name</th>
-                  <th scope="col">Quantity</th>
-                  <th scope="col">Price (INR)</th>
-                  <th scope="col">Amount (INR)</th>
-                  <th scope="col">Profit (INR)</th>
-                  <th scope="col">Customer Name</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for sale in sales %}
-                <tr>
-                  <td scope="col" contenteditable="false">{{sale['id']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['date']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['product']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['sale_qty']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['sale_price']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['sale_amt']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['sale_profit']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['customer']}}</td>
-                  <td scope="col" contenteditable="false">{{sale['status']}}</td>
-                  <td>
-                    <a class="btn btn-outline-primary" href="" role="button" onclick="editRow(this)">Update</a>
-                    <a class="btn btn-outline-success d-none" href="" role="button" onclick="saveRow(this)">Save</a>
-                    <a class="btn btn-outline-danger" role="button" onclick="deleteRow(this)" data-sale-id="{{sale['id']}}" data-product="{{sale['product']}}" data-sale-qty="{{sale['sale_qty']}}" data-sale-date="{{sale['date']}}">
-                      Delete
-                    </a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </main>
+      <div class="dropdown">
+        <button id="dropdownButton" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <span data-feather="calendar" class="align-text-bottom"></span>
+          <span id="dropdownSelected">Today</span>
+        </button>
+        <ul class="dropdown-menu" id="dropdownMenu">
+          <li><a class="dropdown-item" href="/sales/today">Today</a></li>
+          <li><a class="dropdown-item" href="/sales/thisweek">This week</a></li>
+          <li><a class="dropdown-item" href="/sales/thismonth">This month</a></li>
+          <li><a class="dropdown-item" href="/sales/thisquarter">This quarter</a></li>
+          <li><a class="dropdown-item" href="/sales/thisyear">This year</a></li>
+          <li><a class="dropdown-item" href="/sales/alltime">All time</a></li>
+        </ul>
       </div>
     </div>
-    {% include 'script.html' %}
-    {% include 'chart.html' %}
-    <script src="/static/js/sales.js"></script>
-  </body>
-</html>
+  </div>
+  <div class="card mb-4 rounded-3 shadow-sm">
+    <div class="card-body">
+      <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+    </div>
+  </div>
+  <h2>Sales</h2>
+  <!-- Add transaction form -->
+  <form class="mb-5 mt-4" id="sale-form" action="/add_sale" method="POST">
+    <div class="mx-auto row">
+      <div class="col-md-2">
+        <select id="option" name="pname" class="form-control">
+          {% for product in products %}
+          <option value="{{ product['pname'] }}">
+            {{ product['pname'] }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+          <input type="text" class="form-control" name="qty" id="quantity" placeholder="Quantity">
+      </div>
+      <div class="col-md-2">
+        <input type="text" class="form-control" name="price" id="price" placeholder="Price">
+      </div>
+      <div class="col-md-2">
+        <input type="text" class="form-control" name="customer" id="customer" placeholder="Customer Name">
+      </div>
+      <div class="col-md-1">
+        <select id="status" name="status" class="form-control">
+          <option value="Unpaid">Unpaid</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-success" id="add-sale-button" type="submit">Add Sale</button>
+      </div>
+    </div>
+  </form>
+  <div class="card mb-4 rounded-3 shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Date</th>
+              <th scope="col">Product Name</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Price (INR)</th>
+              <th scope="col">Amount (INR)</th>
+              <th scope="col">Profit (INR)</th>
+              <th scope="col">Customer Name</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sale in sales %}
+            <tr>
+              <td scope="col" contenteditable="false">{{sale['id']}}</td>
+              <td scope="col" contenteditable="false">{{sale['date']}}</td>
+              <td scope="col" contenteditable="false">{{sale['product']}}</td>
+              <td scope="col" contenteditable="false">{{sale['sale_qty']}}</td>
+              <td scope="col" contenteditable="false">{{sale['sale_price']}}</td>
+              <td scope="col" contenteditable="false">{{sale['sale_amt']}}</td>
+              <td scope="col" contenteditable="false">{{sale['sale_profit']}}</td>
+              <td scope="col" contenteditable="false">{{sale['customer']}}</td>
+              <td scope="col" contenteditable="false">{{sale['status']}}</td>
+              <td>
+                <a class="btn btn-outline-primary" href="" role="button" onclick="editRow(this)">Update</a>
+                <a class="btn btn-outline-success d-none" href="" role="button" onclick="saveRow(this)">Save</a>
+                <a class="btn btn-outline-danger" role="button" onclick="deleteRow(this)" data-sale-id="{{sale['id']}}" data-product="{{sale['product']}}" data-sale-qty="{{sale['sale_qty']}}" data-sale-date="{{sale['date']}}">
+                  Delete
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <!-- For Chart -->
+  <script>
+    feather.replace({ 'aria-hidden': 'true' })
+    // Parse the data embedded in the HTML template
+    var data = JSON.parse('{{ data | tojson | safe }}');
+
+    // Create the chart using Chart.js
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Sales',
+                data: data.values,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+  </script>
+  <script src="/static/js/sales.js"></script>
+{% endblock %}
