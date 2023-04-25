@@ -24,6 +24,7 @@ def login():
             session['user_id'] = user_id
             session['company'] = company
             session['username'] = username
+            flash(f"Welcome to {company}\'s dashboard", 'success')
             return redirect('/dashboard/thismonth') 
     # If request.method = "GET"
     return render_template('login.html')
@@ -47,6 +48,7 @@ def register():
             return redirect("/login")
 
       else:
+        flash('The username you entered already exists! Try again', 'danger')
         redirect(url_for('register'))
                        
     # If request.method = "GET"

@@ -7,11 +7,11 @@ def authenticate_user(users, username, password):
     # users is a list of dictionary
     if user['uname'] == username and user['upass'] == password:
       return user['uid'], user['company'], user['uname']
-  return None, None
+  return None, None, None
 
 def check_existing_user(users, username, company):
   for user in users:
-    if user['uname'] == username or username == "" or user['company'] == company or company == "":
+    if user['uname'] == username:
       return False
   return True
 

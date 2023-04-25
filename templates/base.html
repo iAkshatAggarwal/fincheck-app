@@ -31,7 +31,7 @@
             <span class="visually-hidden">Toggle Dropdown</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end" style="position: absolute; transform: translateX(-10px);">
-            <li><a class="dropdown-item text-muted" href="#">{{username}}</a></li>
+            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">Profile</a></li>
             <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#passwordModal" >Change password</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="w-100 btn btn-danger" href="/logout">Sign out</a></li>
@@ -91,6 +91,10 @@
               </a>
             </li>
           </ul>
+          <footer class="my-5 pt-5 text-muted text-center text-small">
+            <img src="/static/shark.png" class="img-fluid animated d-inline align-middle" alt="" width="40" height="40">
+            <p class="fs-3 d-inline align-middle" style="margin-left: 10px;"><strong>FinCheck</strong></p>
+          </footer>
         </div>
       </nav>
       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="dashboardSection">
@@ -127,7 +131,24 @@
             </div>
           </form>
         </div>
-        
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="profileModalLabel">Profile Details</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>Username: <span class="text-muted">{{username}}</span></h6>
+          <h6>Company: <span class="text-muted">{{company}}</span></h6>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
