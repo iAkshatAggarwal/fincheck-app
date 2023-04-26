@@ -18,14 +18,14 @@ function saveRow(button) {
   
     // Get the updated values of each cell
     let id = row.cells[0].textContent;
-    let date = row.cells[1].textContent;
-    let product = row.cells[2].textContent;
-    let sale_qty = row.cells[3].textContent;
-    let sale_price = row.cells[4].textContent;
-    let sale_amt = row.cells[5].textContent;
-    let sale_profit = row.cells[6].textContent;
-    let customer = row.cells[7].textContent;
-    let status = row.cells[8].textContent;
+    let date = row.cells[2].textContent;
+    let product = row.cells[3].textContent;
+    let sale_qty = row.cells[4].textContent;
+    let sale_price = row.cells[5].textContent;
+    let sale_amt = row.cells[6].textContent;
+    let sale_profit = row.cells[7].textContent;
+    let customer = row.cells[8].textContent;
+    let status = row.cells[9].textContent;
   
     // Send an AJAX request to update the product
     let xhr = new XMLHttpRequest();

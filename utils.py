@@ -1,13 +1,17 @@
 from datetime import datetime, date, timedelta
 from sklearn.linear_model import LinearRegression
 import pandas as pd
+import uuid
+
+def get_referral_code():
+    return str(uuid.uuid4().hex)[:10]
 
 def authenticate_user(users, username, password):
   for user in users:
     # users is a list of dictionary
     if user['uname'] == username and user['upass'] == password:
-      return user['uid'], user['company'], user['uname']
-  return None, None, None
+      return user['uid'], user['company'], user['uname'], user['referral_code']
+  return None, None, None, None
 
 def check_existing_user(users, username, company):
   for user in users:

@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, session, redirect, url_for, flash
-from utils import authenticate_user, check_existing_user, get_pass_from_uid, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
+from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
 from database import add_user, change_password, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
@@ -15,15 +15,17 @@ def index():
 def login():
     if request.method == "POST": 
         users = load_users()
-        user_id, company, username = authenticate_user(users, 
+        user_id, company, username, referral_code = authenticate_user(users, 
                                       request.form["username"], 
                                       request.form["password"])
         if user_id is None: 
-            return render_template('login.html', login_error = True)
+            flash('Incorrect Password! Please try again', 'danger')
+            redirect(url_for('login'))
         else:
             session['user_id'] = user_id
             session['company'] = company
             session['username'] = username
+            session['referral_code'] = referral_code
             flash(f"Welcome to {company}\'s dashboard", 'success')
             return redirect('/dashboard/thismonth') 
     # If request.method = "GET"
@@ -41,18 +43,20 @@ def register():
     if request.method == "POST": 
       users = load_users()
       if check_existing_user(users, request.form["username"], request.form["company"]):
+        referral_code = get_referral_code()
         if add_user(request.form["username"], 
                     request.form["password"],
                     request.form["company"],
-                    request.form["email"]):
+                    request.form["email"],
+                    referral_code):
             return redirect("/login")
 
       else:
         flash('The username you entered already exists! Try again', 'danger')
-        redirect(url_for('register'))
+        redirect(url_for('login'))
                        
     # If request.method = "GET"
-    return render_template('register.html')
+    return render_template('login.html')
 
 @app.route('/change-password', methods=["POST"])
 def change_pass():
@@ -79,6 +83,7 @@ def dashboard(interval="today"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
@@ -130,6 +135,7 @@ def dashboard(interval="today"):
       return render_template('dashboard.html',
                              company=company,
                              username=username,
+                             referral_code=referral_code,
                              g_revenue=g_revenue,
                              g_margin=g_margin,
                              perc_gmargin=perc_gmargin,
@@ -153,6 +159,7 @@ def show_products():
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
@@ -163,6 +170,7 @@ def show_products():
       return render_template('products.html',
                              company=company,
                              username=username,
+                             referral_code=referral_code,
                              products=products,
                              data=data)
 
@@ -196,6 +204,7 @@ def show_ledgers(interval="today"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
@@ -212,6 +221,7 @@ def show_ledgers(interval="today"):
       return render_template('ledger.html',
                              company=company,
                              username=username,
+                             referral_code=referral_code,
                              ledgers=interval_ledgers,
                              wholesalers=wholesalers,
                              data=data)
@@ -255,6 +265,7 @@ def show_sales(interval = "thisweek"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
@@ -271,6 +282,7 @@ def show_sales(interval = "thisweek"):
       return render_template('sales.html',
                              company=company,
                              username=username,
+                             referral_code=referral_code,
                              products = products,
                              sales=interval_sales,
                              data=data)
@@ -318,6 +330,7 @@ def show_expenses(interval = "thisweek"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
@@ -332,6 +345,7 @@ def show_expenses(interval = "thisweek"):
       return render_template('expenses.html',
                               company=company,
                               username=username,
+                              referral_code=referral_code,
                               expenses=interval_expenses,
                               data=data)
 
@@ -362,6 +376,7 @@ def show_customers():
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
@@ -374,6 +389,7 @@ def show_customers():
       return render_template('customers.html',
                              company=company,
                              username=username,
+                             referral_code=referral_code,
                              unpaid_customers=unpaid_customers,
                              data=data)
 
@@ -383,6 +399,7 @@ def show_replacements(interval="today"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
@@ -398,6 +415,7 @@ def show_replacements(interval="today"):
       return render_template('replacements.html',
                              company=company,
                              username=username,
+                             referral_code=referral_code,
                              products=products,
                              replacements=interval_replacements,
                              data=data)

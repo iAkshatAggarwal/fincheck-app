@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-  <title>Hisaab: Customers</title>
+  <title>FinCheck: Customers</title>
   <style>
     .sidebar #customers {
       color: #2470dc;
@@ -46,11 +46,11 @@
             {% for customer in unpaid_customers %}
             <tr>
               <td scope="col">{{customer['customer']}}</td>
-              <td scope="col">{{customer['sale_date']}}</td>
+              <td scope="col">{{customer['date']}}</td>
               <td scope="col">{{customer['product']}}</td>
               <td scope="col">{{customer['sale_qty']}}</td>
               <td scope="col">{{customer['sale_amt']}}</td>
-              <td scope="col">Unpaid</td>
+              <td scope="col"><span class="badge text-bg-danger">Unpaid</span></td>
             </tr>
             {% endfor %}
           </tbody>

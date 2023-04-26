@@ -16,16 +16,17 @@ engine = create_engine(conn_string, connect_args = {
   }
 })
 
-def add_user(uname, upass, company, email):
+def add_user(uname, upass, company, email, referral_code):
   with engine.connect() as conn:
-    query = text("INSERT INTO users(uname, upass, company, email) VALUES (:uname, :upass, :company, :email)")
+    query = text("INSERT INTO users(uname, upass, company, email, referral_code) VALUES (:uname, :upass, :company, :email, :referral_code)")
     conn.execute(query,
                  {
                   'uname': uname, 
                   'upass': upass, 
                   'company': company,
                   'email': email,
-                  'onboarded': datetime.datetime.now()
+                  'onboarded': datetime.datetime.now(),
+                  'referral_code': referral_code
                  }
     )
     return True
