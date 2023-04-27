@@ -1,11 +1,20 @@
 import os
+import random
 from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask_mail import Mail, Message
 from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
 from database import add_user, change_password, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
 app.secret_key = os.environ['SECRET_KEY']
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
+mail = Mail(app)
 
 @app.route('/')
 def index():
@@ -42,21 +51,46 @@ def logout():
 def register():
     if request.method == "POST": 
       users = load_users()
-      if check_existing_user(users, request.form["username"], request.form["company"]):
-        referral_code = get_referral_code()
-        if add_user(request.form["username"], 
-                    request.form["password"],
-                    request.form["company"],
-                    request.form["email"],
-                    referral_code):
-            return redirect("/login")
+      if check_existing_user(users, request.form["username"], request.form["email"]):
+        session['username'] = request.form["username"]
+        session['password'] = request.form["password"]
+        session['company'] = request.form["company"]
+        session['email'] = request.form['email']
+        otp = str(random.randint(1000, 9999))
+        session['otp'] = otp
+        msg = Message('FinCheck Registration', sender= os.environ.get('MAIL_USERNAME'), recipients=[request.form['email']])
+        msg.body = f'Your OTP for registration at FinCheck is: {otp}'
+        msg.importance = 'high'
+        mail.send(msg)
+        return render_template('login.html', showModal=True)
 
       else:
-        flash('The username you entered already exists! Try again', 'danger')
+        flash('The username or email you entered already exists! Try again', 'danger')
         redirect(url_for('login'))
                        
     # If request.method = "GET"
     return render_template('login.html')
+
+@app.route('/verify', methods=['GET', 'POST'])
+def verify():
+    if 'email' not in session or 'otp' not in session:
+        return redirect(url_for('login'))
+      
+    if request.method == 'POST':
+        user_otp = request.form['otp']
+        if user_otp == session['otp']:
+            referral_code = get_referral_code()
+            if add_user(session['username'], 
+                    session['password'],
+                    session['company'] ,
+                    session['email'],
+                    referral_code):
+              session.clear()
+              flash('Registration successful!', 'success')
+              return redirect("/login")
+        else:
+            flash('Invalid OTP! Try again', 'danger')
+            redirect(url_for('login'))
 
 @app.route('/change-password', methods=["POST"])
 def change_pass():

@@ -13,9 +13,9 @@ def authenticate_user(users, username, password):
       return user['uid'], user['company'], user['uname'], user['referral_code']
   return None, None, None, None
 
-def check_existing_user(users, username, company):
+def check_existing_user(users, username, email):
   for user in users:
-    if user['uname'] == username:
+    if user['uname'] == username or user['email'] == email:
       return False
   return True
 

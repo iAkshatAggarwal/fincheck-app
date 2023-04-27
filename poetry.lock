@@ -1,4 +1,12 @@
 [[package]]
+name = "blinker"
+version = "1.6.2"
+description = "Fast, simple object-to-object and broadcast signaling"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
@@ -34,6 +42,18 @@ Werkzeug = ">=2.2.2"
 [package.extras]
 async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
+
+[[package]]
+name = "flask-mail"
+version = "0.9.1"
+description = "Flask extension for sending email"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+blinker = "*"
+Flask = "*"
 
 [[package]]
 name = "flask-sqlalchemy"
@@ -309,12 +329,14 @@ watchdog = ["watchdog"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "3ffa09aa8ce74eef784573bbb7f84faaf4c49bfc3e77213f13b532df872b5a9e"
+content-hash = "4f8824a8def509470f92a3242d1bc3e79e168343252415022f2bc60ac339a7f1"
 
 [metadata.files]
+blinker = []
 click = []
 colorama = []
 flask = []
+flask-mail = []
 flask-sqlalchemy = []
 greenlet = []
 itsdangerous = []
