@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block head %}
+  <title>FinCheck: Dashboard</title>
+  <style>
+      .sidebar #dashboard {
+      color: #2470dc;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
+
+{% block main %}
+  {% if showModal %}
+  <script>
+    $(window).on('load',function(){
+        $('#subsModal').modal('show');
+    });
+  </script>
+  {% endif %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadAsXLSX()">Share</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportButton">Export</button>
+      </div>
+      <div class="dropdown">
+        <button id="dropdownButton" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <span data-feather="calendar" class="align-text-bottom"></span>
+          <span id="dropdownSelected">Today</span>
+        </button>
+        <ul class="dropdown-menu" id="dropdownMenu">
+          <li><a class="dropdown-item" href="/dashboard/today">Today</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thisweek">This week</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thismonth">This month</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thisquarter">This quarter</a></li>
+          <li><a class="dropdown-item" href="/dashboard/thisyear">This year</a></li>
+          <li><a class="dropdown-item" href="/dashboard/alltime">All time</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!--Cards -->
+  <div class="row mb-4 row-cols-1 row-cols-md-3 mt-5 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Gross Revenue</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Gross Margin</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Gross Expenditure</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div class="row mb-4 row-cols-1 row-cols-md-3 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Net Revenue</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">COGS</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">EBITDA</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+  </div>
+  <!-- Prediction -->
+  <div class="row mb-5 row-cols-1 row-cols-md-3 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Revenue Forecast</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Profit Forecast</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title pricing-card-title">Inventory Cost</h3>
+            <h4 class="card-title placeholder-glow">
+              <span class="placeholder bg-primary col-6"></span>
+            </h4>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Monthly Sales </h3>
+          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title">Daily Sales</h3>
+          <canvas class="my-4 w-100" id="myChart1" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2 mt-5">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Expenses by Category </h3>
+          <canvas class="my-4 w-100" id="myChart2" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Daily Expenses </h3>
+          <canvas class="my-4 w-100" id="myChart3" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2 mt-5">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Top Products by Quantity </h3>
+          <div class="table-responsive">
+            <table class="table table-sm mt-2">
+              <thead>
+                <tr>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Profit (INR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Top Products by Profit </h3>
+          <div class="table-responsive">
+            <table class="table table-sm mt-2">
+              <thead>
+                <tr>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Profit (INR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Subscription Modal -->
+  <div class="modal fade" id="subsModal" tabindex="-1" aria-labelledby="subsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="subsModalLabel">Buy Subscription</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container py-3">
+            <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+              <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm">
+                  <div class="card-header py-3">
+                    <h4 class="my-0 fw-normal">Monthly</h4>
+                  </div>
+                  <div class="card-body">
+                    <h1 class="card-title pricing-card-title">&#x20b9;699<small class="text-body-secondary fw-light">/mo</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                      <li>28 days validity</li>
+                      <li>Unlimited storage</li>
+                      <li>Email support</li>
+                      <li>Help center access</li>
+                    </ul>
+                    <button type="button" id="rzp-button1" class="w-100 btn btn-lg btn-outline-primary"> Get Started</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm">
+                  <div class="card-header py-3">
+                    <h4 class="my-0 fw-normal">Quarterly</h4>
+                  </div>
+                  <div class="card-body">
+                    <h1 class="card-title pricing-card-title">&#x20b9;1999<small class="text-body-secondary fw-light">/qtr</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                      <li>84 days validity</li>
+                      <li>Unlimited storage</li>
+                      <li>Priority email support</li>
+                      <li>Help center access</li>
+                    </ul>
+                    <button type="button" class="w-100 btn btn-lg btn-primary">Get started</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm border-primary">
+                  <div class="card-header py-3 text-bg-primary border-primary">
+                    <h4 class="my-0 fw-normal">Yearly</h4>
+                  </div>
+                  <div class="card-body">
+                    <h1 class="card-title pricing-card-title">&#x20b9;7999<small class="text-body-secondary fw-light">/yr</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                      <li>365 days validity</li>
+                      <li>Unlimited storage</li>
+                      <li>Phone and email support</li>
+                      <li>Help center access</li>
+                    </ul>
+                    <button type="button" class="w-100 btn btn-lg btn-primary">Get Started</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>feather.replace({ 'aria-hidden': 'true' })</script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+  var options = {
+      "key": "{{key}}", // Enter the Key ID generated from the Dashboard
+      "amount": "69900", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+      "currency": "INR",
+      "name": "FinCheck", //your business name
+      "description": "Test Transaction",
+      "image": "{{url_for('static', filename='/shark.png')}}",
+      "order_id": "{{order_id}}", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+      "handler": function (response){
+          alert(response.razorpay_payment_id);
+          alert(response.razorpay_order_id);
+          alert(response.razorpay_signature)
+      },
+      "prefill": {
+          "name": "{{username}}", //your customer's name
+          "email": "{{email}}"
+      },
+      "notes": {
+          "address": "Razorpay Corporate Office"
+      },
+      "theme": {
+          "color": "#3399cc"
+      }
+  };
+  var rzp1 = new Razorpay(options);
+  rzp1.on('payment.failed', function (response){
+          alert(response.error.code);
+          alert(response.error.description);
+          alert(response.error.source);
+          alert(response.error.step);
+          alert(response.error.reason);
+          alert(response.error.metadata.order_id);
+          alert(response.error.metadata.payment_id);
+  });
+  document.getElementById('rzp-button1').onclick = function(e){
+      rzp1.open();
+      e.preventDefault();
+  }
+  </script>
+{% endblock %}

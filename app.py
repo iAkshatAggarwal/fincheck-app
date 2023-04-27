@@ -1,5 +1,6 @@
 import os
 import random
+from datetime import datetime
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
 from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
@@ -24,7 +25,7 @@ def index():
 def login():
     if request.method == "POST": 
         users = load_users()
-        user_id, company, username, referral_code = authenticate_user(users, 
+        user_id, company, username, referral_code, subs_end = authenticate_user(users, 
                                       request.form["username"], 
                                       request.form["password"])
         if user_id is None: 
@@ -35,6 +36,7 @@ def login():
             session['company'] = company
             session['username'] = username
             session['referral_code'] = referral_code
+            session['subs_end'] = subs_end
             flash(f"Welcome to {company}\'s dashboard", 'success')
             return redirect('/dashboard/thismonth') 
     # If request.method = "GET"
@@ -58,9 +60,8 @@ def register():
         session['email'] = request.form['email']
         otp = str(random.randint(1000, 9999))
         session['otp'] = otp
-        msg = Message('FinCheck Registration', sender= os.environ.get('MAIL_USERNAME'), recipients=[request.form['email']])
-        msg.body = f'Your OTP for registration at FinCheck is: {otp}'
-        msg.importance = 'high'
+        msg = Message('FinCheck | OTP to Verify Email', sender= os.environ.get('MAIL_USERNAME'), recipients=[request.form['email']])
+        msg.body = f'Verify your email to finish signing up with FinCheck. Use the following verification code: {otp}'
         mail.send(msg)
         return render_template('login.html', showModal=True)
 
@@ -108,6 +109,10 @@ def change_pass():
 @app.route('/plans')
 def plans():
     return render_template("subscription.html")
+
+# @app.route('/checkout')
+# def checkout():
+#     client = razorpay.Client(auth=("id","key"))
           
 #------------------------------- Dashboard -------------------------------
 
@@ -118,9 +123,16 @@ def dashboard(interval="today"):
     company = session.get('company')
     username = session.get('username')
     referral_code = session.get('referral_code')
+    subs_end = session.get('subs_end')
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
+    elif subs_end is None or subs_end < datetime.utcnow(): #If user has not subscribed
+        return render_template('altdash.html',
+                               company=company,
+                               username=username,
+                               referral_code=referral_code, 
+                               showModal=True)
     else:
       # user is authenticated, render dashboard page
       sales = load_sales(user_id)
