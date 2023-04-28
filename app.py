@@ -176,7 +176,7 @@ def dashboard(interval="today"):
     email = session.get('email')
     referral_code = session.get('referral_code')
     subs_end = get_subs_end(users, user_id)
-    print(subs_end)
+    session['subs_end'] = subs_end
     utc_now = datetime.datetime.now()
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -263,6 +263,8 @@ def show_products():
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
+    subs_end = session.get('subs_end')
     referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -274,6 +276,8 @@ def show_products():
       return render_template('products.html',
                              company=company,
                              username=username,
+                             subs_end=subs_end,
+                             email=email,
                              referral_code=referral_code,
                              products=products,
                              data=data)
@@ -308,6 +312,8 @@ def show_sales(interval = "thisweek"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
+    subs_end = session.get('subs_end')
     referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -325,6 +331,8 @@ def show_sales(interval = "thisweek"):
       return render_template('sales.html',
                              company=company,
                              username=username,
+                             email=email,
+                             subs_end=subs_end,
                              referral_code=referral_code,
                              products = products,
                              sales=interval_sales,
@@ -374,6 +382,8 @@ def show_ledgers(interval="today"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
+    subs_end = session.get('subs_end')
     referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -391,6 +401,8 @@ def show_ledgers(interval="today"):
       return render_template('ledger.html',
                              company=company,
                              username=username,
+                             email=email,
+                             subs_end=subs_end,
                              referral_code=referral_code,
                              ledgers=interval_ledgers,
                              wholesalers=wholesalers,
@@ -426,6 +438,8 @@ def show_wholesalers(interval="today"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
+    subs_end = session.get('subs_end')
     referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -443,6 +457,8 @@ def show_wholesalers(interval="today"):
       return render_template('wholesalers.html',
                              company=company,
                              username=username,
+                             email=email,
+                             subs_end=subs_end,
                              referral_code=referral_code,
                              ledgers=interval_ledgers,
                              wholesalers=wholesalers,
@@ -478,6 +494,8 @@ def show_expenses(interval = "thisweek"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
+    subs_end = session.get('subs_end')
     referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -493,6 +511,8 @@ def show_expenses(interval = "thisweek"):
       return render_template('expenses.html',
                               company=company,
                               username=username,
+                              email=email,
+                              subs_end=subs_end,
                               referral_code=referral_code,
                               expenses=interval_expenses,
                               data=data)
@@ -524,6 +544,8 @@ def show_customers():
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
+    subs_end = session.get('subs_end')
     referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -537,6 +559,8 @@ def show_customers():
       return render_template('customers.html',
                              company=company,
                              username=username,
+                             email=email,
+                             subs_end=subs_end,
                              referral_code=referral_code,
                              unpaid_customers=unpaid_customers,
                              data=data)
@@ -547,6 +571,8 @@ def show_replacements(interval="today"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
+    subs_end = session.get('subs_end')
     referral_code = session.get('referral_code')
     if user_id is None:
         # user is not authenticated, redirect to login page
@@ -563,6 +589,8 @@ def show_replacements(interval="today"):
       return render_template('replacements.html',
                              company=company,
                              username=username,
+                             email=email,
+                             subs_end=subs_end,
                              referral_code=referral_code,
                              products=products,
                              replacements=interval_replacements,
