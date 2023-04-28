@@ -617,6 +617,13 @@ def mod_repl():
                           user_id):
       return redirect('/replacements/thisweek')
       
+@app.route("/terms")
+def terms():
+    return render_template("tnc.html")
 
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+  
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
