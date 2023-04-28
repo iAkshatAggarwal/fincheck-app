@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block head %}
-  <title>FinCheck: Ledgers</title>
+  <title>FinCheck: Wholesalers</title>
   <style>
-    .sidebar #ledgers {
+    .sidebar #wholesalers {
       color: #2470dc;
     }
   </style>
@@ -40,27 +40,21 @@
     </div>
   </div>
   <!-- Tables -->
-  <h2>Ledger</h2>
-  <!-- Add transaction form -->
-  <form class="mb-5 mt-4" action="/add_ledger" method="POST">
+  <h2>Wholesalers</h2>
+  <!-- Add Wholesalers form -->
+  <form class="mb-5 mt-4" action="/add_wholesaler" method="POST">
     <div class="mx-auto row">
       <div class="col-md-2">
-        <select id="option" name="wname" class="form-control">
-          {% for wholesaler in wholesalers %}
-          <option value="{{ wholesaler['wname'] }}">
-            {{ wholesaler['wname'] }}
-          </option>
-          {% endfor %}
-        </select>
+        <input type="text" class="form-control" name="wname" placeholder="Wholesaler name">
       </div>
       <div class="col-md-2">
-          <input type="text" class="form-control" name="credit" placeholder="Credit">
+          <input type="text" class="form-control" name="wcontact" placeholder="Contact">
       </div>
       <div class="col-md-2">
-        <input type="text" class="form-control" name="debit" placeholder="Debit">
+        <input type="text" class="form-control" name="waddress" placeholder="Address">
        </div>
       <div class="col-md-3">
-        <button class="btn btn-success" type="submit">Add transaction</button>
+        <button class="btn btn-success" type="submit">Add Wholesaler</button>
       </div>
     </div>
   </form>
@@ -74,24 +68,25 @@
               <th scope="col" class="d-none">Table ID</th>
               <th scope="col">ID</th>
               <th scope="col">Wholesaler</th>
-              <th scope="col">Transaction time</th>
-              <th scope="col">Credit(INR)</th>
-              <th scope="col">Debit(INR)</th>
+              <th scope="col">Contact</th>
+              <th scope="col">Address</th>
+              <th scope="col">Onboarded</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {% for ledger in ledgers %}
+            {% for wholesaler in wholesalers %}
             <tr>
-              <td scope="col" contenteditable="false" class="d-none">{{ledger['wid']}}</td>
+              <td scope="col" contenteditable="false" class="d-none">{{wholesaler['wid']}}</td>
               <td scope="col" contenteditable="false">{{loop.index}}</td>
-              <td scope="col" contenteditable="false">{{ledger['wname']}}</td>
-              <td scope="col" contenteditable="false">{{ledger['date']}}</td>
-              <td scope="col" contenteditable="false">{{ledger['credit']}}</td>
-              <td scope="col" contenteditable="false">{{ledger['debit']}}</td>
+              <td scope="col" contenteditable="false">{{wholesaler['wname']}}</td>
+              <td scope="col" contenteditable="false">{{wholesaler['wcontact']}}</td>
+              <td scope="col" contenteditable="false">{{wholesaler['waddress']}}</td>
+              <td scope="col" contenteditable="false">{{wholesaler['onboarded']}}</td>
               <td>
                 <a class="btn btn-outline-primary" href="" role="button" onclick="editRow(this)">Update</a>
                 <a class="btn btn-outline-success d-none" href="" role="button" onclick="saveRow(this)">Save</a>
-                <a class="btn btn-outline-danger" href="/ledgers/{{ledger['wid']}}/delete" role="button">Delete</a>
+                <a class="btn btn-outline-danger" href="/wholesalers/{{wholesaler['wid']}}/delete" role="button">Delete</a>
               </td>
             </tr>
             {% endfor %}
@@ -134,5 +129,5 @@
         }
     });
   </script>
-  <script src="/static/js/ledger.js"></script>
+  <script src="/static/js/wholesalers.js"></script>
 {% endblock %}

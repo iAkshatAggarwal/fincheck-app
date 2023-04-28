@@ -164,71 +164,9 @@ def update_product(pname, pcp, psp, pqty):
                  }
     )
     return True
-
-#------------------------------- Ledgers -------------------------------
-def add_wholesaler(wname, wcontact, waddress, uid):
-  with engine.connect() as conn:
-    query = text("INSERT INTO wholesalers(wname, wcontact, waddress, onboarded, uid) VALUES (:wname, :wcontact, :waddress, :onboarded, :uid)")
-    conn.execute(query,
-                 {'wname': wname,
-                  'wcontact': wcontact,
-                  'waddress': waddress,
-                  'onboarded': datetime.datetime.now(),
-                  'uid': uid
-                 }
-    )
-    return True
-
-def add_ledger(wname, credit, debit, uid):
-  with engine.connect() as conn:
-    ledgers = load_ledgers(uid)
-    ledger_subset = [ledger for ledger in ledgers if ledger['wname'] == wname]
-    if len(ledger_subset) > 0:
-        latest_ledger = sorted(ledger_subset, key=lambda x: x['date'])[-1]
-        credit = latest_ledger['credit']
-        credit -= int(debit)
-    for ledger in ledgers:
-      if ledger['wname'] != wname and credit == "":
-        credit = 0
-    if debit == "":
-      debit = 0
-    
-    query = text("INSERT INTO ledger(wname, date, credit, debit, uid) VALUES (:wname, :date, :credit, :debit, :uid)")
-    conn.execute(query,
-                 {
-                  'wname': wname, 
-                  'date': datetime.datetime.now(), 
-                  'credit': credit, 
-                  'debit': debit,
-                  'uid': uid
-                 }
-    )
-    return True
-
-def delete_ledger(id):
-  with engine.connect() as conn:
-    conn.execute(text("DELETE FROM ledger WHERE wid = :val"), {'val': id})
-    return True
-
-def update_ledger(wid, wname, date, credit, debit):
-  with engine.connect() as conn:
-    if credit == "":
-      credit = 0
-    elif debit == "":
-      debit = 0
-    query = (text("UPDATE ledger SET wname =:wname, date =:date, credit =:credit, debit =:debit WHERE wid = :wid"))
-    conn.execute(query,
-                 {
-                  'wid': wid, 
-                  'wname': wname, 
-                  'date': date, 
-                  'credit': credit, 
-                  'debit': debit
-                 }
-    )
-    return True
     
 #------------------------------- Sales -------------------------------
+
 def add_sale(pname, qty, price, customer, status, uid):
   with engine.connect() as conn:
     #to get cp
@@ -299,6 +237,91 @@ def update_sale(id, date, product, sale_qty,
                   'customer': customer,
                   'status': status,
                   'uid': uid
+                 }
+    )
+    return True
+
+#------------------------------- Wholesalers -------------------------------
+
+def add_wholesaler(wname, wcontact, waddress, uid):
+  with engine.connect() as conn:
+    query = text("INSERT INTO wholesalers(wname, wcontact, waddress, onboarded, uid) VALUES (:wname, :wcontact, :waddress, :onboarded, :uid)")
+    conn.execute(query,
+                 {'wname': wname,
+                  'wcontact': wcontact,
+                  'waddress': waddress,
+                  'onboarded': datetime.datetime.now(),
+                  'uid': uid
+                 }
+    )
+    return True
+
+def delete_wholesaler(id):
+  with engine.connect() as conn:
+    conn.execute(text("DELETE FROM wholesalers WHERE wid = :val"), {'val': id})
+    return True
+
+def update_wholesaler(wid, wname, wcontact, waddress, onboarded):
+  with engine.connect() as conn:
+    query = (text("UPDATE wholesalers SET wname =:wname, wcontact =:wcontact, waddress =:waddress, onboarded =:onboarded WHERE wid = :wid"))
+    conn.execute(query,
+                 {
+                  'wid': wid, 
+                  'wname': wname, 
+                  'wcontact': wcontact, 
+                  'waddress': waddress, 
+                  'onboarded': onboarded
+                 }
+    )
+    return True
+    
+#------------------------------- Ledgers -------------------------------
+
+def add_ledger(wname, credit, debit, uid):
+  with engine.connect() as conn:
+    ledgers = load_ledgers(uid)
+    ledger_subset = [ledger for ledger in ledgers if ledger['wname'] == wname]
+    if len(ledger_subset) > 0:
+        latest_ledger = sorted(ledger_subset, key=lambda x: x['date'])[-1]
+        credit = latest_ledger['credit']
+        credit -= int(debit)
+    for ledger in ledgers:
+      if ledger['wname'] != wname and credit == "":
+        credit = 0
+    if debit == "":
+      debit = 0
+    
+    query = text("INSERT INTO ledger(wname, date, credit, debit, uid) VALUES (:wname, :date, :credit, :debit, :uid)")
+    conn.execute(query,
+                 {
+                  'wname': wname, 
+                  'date': datetime.datetime.now(), 
+                  'credit': credit, 
+                  'debit': debit,
+                  'uid': uid
+                 }
+    )
+    return True
+
+def delete_ledger(id):
+  with engine.connect() as conn:
+    conn.execute(text("DELETE FROM ledger WHERE wid = :val"), {'val': id})
+    return True
+
+def update_ledger(wid, wname, date, credit, debit):
+  with engine.connect() as conn:
+    if credit == "":
+      credit = 0
+    elif debit == "":
+      debit = 0
+    query = (text("UPDATE ledger SET wname =:wname, date =:date, credit =:credit, debit =:debit WHERE wid = :wid"))
+    conn.execute(query,
+                 {
+                  'wid': wid, 
+                  'wname': wname, 
+                  'date': date, 
+                  'credit': credit, 
+                  'debit': debit
                  }
     )
     return True

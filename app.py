@@ -5,7 +5,7 @@ import razorpay
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
 from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
-from database import add_user, change_password, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
+from database import add_user, change_password, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, delete_wholesaler, update_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
 app.secret_key = os.environ['SECRET_KEY']
@@ -173,6 +173,7 @@ def dashboard(interval="today"):
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
+    email = session.get('email')
     referral_code = session.get('referral_code')
     subs_end = get_subs_end(users, user_id)
     print(subs_end)
@@ -184,6 +185,8 @@ def dashboard(interval="today"):
         return render_template('altdash.html',
                                company=company,
                                username=username,
+                               email=email,
+                               subs_end=subs_end,
                                referral_code=referral_code, 
                                showModal=True)
     else:
@@ -234,6 +237,8 @@ def dashboard(interval="today"):
       return render_template('dashboard.html',
                              company=company,
                              username=username,
+                             email=email,
+                             subs_end=subs_end,
                              referral_code=referral_code,
                              g_revenue=g_revenue,
                              g_margin=g_margin,
@@ -295,67 +300,6 @@ def mod_prod():
                       request.form.get('psp'),
                       request.form.get('pqty')):
       return redirect('/products')
-
-#------------------------------- Ledgers -------------------------------
-
-@app.route('/ledgers/<interval>')
-def show_ledgers(interval="today"):
-    user_id = session.get('user_id')
-    company = session.get('company')
-    username = session.get('username')
-    referral_code = session.get('referral_code')
-    if user_id is None:
-        # user is not authenticated, redirect to login page
-        return redirect(url_for('login'))
-    else:
-      ledgers = load_ledgers(user_id)
-      wholesalers = load_wholesalers(user_id)
-      result = get_latest_credits(ledgers)
-      # Assigning interval dates
-      start_date, end_date = get_interval_dates(interval, ledgers)
-      #Extract expenses data for given interval
-      interval_ledgers = extract_interval_data(ledgers, start_date, end_date)
-      #For chart
-      data = make_chart(result, 'wname', 'credit')
-      return render_template('ledger.html',
-                             company=company,
-                             username=username,
-                             referral_code=referral_code,
-                             ledgers=interval_ledgers,
-                             wholesalers=wholesalers,
-                             data=data)
-
-@app.route("/add_wholesaler", methods=["GET", "POST"])
-def add_wsaler():
-    user_id = session.get('user_id')
-    if add_wholesaler(request.form["wname"],
-                  request.form["wcontact"],
-                  request.form["waddress"],
-                  user_id):
-      return redirect("/ledgers/thisweek")
-
-@app.route("/add_ledger", methods=["GET", "POST"])
-def add_led():
-    user_id = session.get('user_id')
-    if add_ledger(request.form["wname"],
-                  request.form["credit"],
-                  request.form["debit"],
-                  user_id):
-      return redirect("/ledgers/thisweek")
-
-@app.route("/ledgers/<wid>/delete")
-def del_led(wid):
-    if delete_ledger(wid):
-      return redirect("/ledgers/thisweek")  
-
-@app.route("/ledgers/update", methods=["GET", "POST"])
-def mod_led():
-    if update_ledger(request.form.get('wid'),
-                      request.form.get('wname'),
-                      request.form.get('date'),
-                      request.form.get('credit'),
-                      request.form.get('debit')):
-      return redirect('/ledgers/thisweek')
 
 #------------------------------- Sales -------------------------------
 
@@ -423,7 +367,112 @@ def mod_sale():
                 user_id):
       return redirect("/sales/thisweek")
 
+#------------------------------- Ledgers -------------------------------
+
+@app.route('/ledgers/<interval>')
+def show_ledgers(interval="today"):
+    user_id = session.get('user_id')
+    company = session.get('company')
+    username = session.get('username')
+    referral_code = session.get('referral_code')
+    if user_id is None:
+        # user is not authenticated, redirect to login page
+        return redirect(url_for('login'))
+    else:
+      ledgers = load_ledgers(user_id)
+      wholesalers = load_wholesalers(user_id)
+      result = get_latest_credits(ledgers)
+      # Assigning interval dates
+      start_date, end_date = get_interval_dates(interval, ledgers)
+      #Extract expenses data for given interval
+      interval_ledgers = extract_interval_data(ledgers, start_date, end_date)
+      #For chart
+      data = make_chart(result, 'wname', 'credit')
+      return render_template('ledger.html',
+                             company=company,
+                             username=username,
+                             referral_code=referral_code,
+                             ledgers=interval_ledgers,
+                             wholesalers=wholesalers,
+                             data=data)
+
+@app.route("/add_ledger", methods=["GET", "POST"])
+def add_led():
+    user_id = session.get('user_id')
+    if add_ledger(request.form["wname"],
+                  request.form["credit"],
+                  request.form["debit"],
+                  user_id):
+      return redirect("/ledgers/thisweek")
+
+@app.route("/ledgers/<wid>/delete")
+def del_led(wid):
+    if delete_ledger(wid):
+      return redirect("/ledgers/thisweek")  
+
+@app.route("/ledgers/update", methods=["GET", "POST"])
+def mod_led():
+    if update_ledger(request.form.get('wid'),
+                      request.form.get('wname'),
+                      request.form.get('date'),
+                      request.form.get('credit'),
+                      request.form.get('debit')):
+      return redirect('/ledgers/thisweek')
+
+#------------------------------- Wholesalers -------------------------------
+
+@app.route('/wholesalers/<interval>')
+def show_wholesalers(interval="today"):
+    user_id = session.get('user_id')
+    company = session.get('company')
+    username = session.get('username')
+    referral_code = session.get('referral_code')
+    if user_id is None:
+        # user is not authenticated, redirect to login page
+        return redirect(url_for('login'))
+    else:
+      ledgers = load_ledgers(user_id)
+      wholesalers = load_wholesalers(user_id)
+      result = get_latest_credits(ledgers)
+      # Assigning interval dates
+      start_date, end_date = get_interval_dates(interval, ledgers)
+      #Extract expenses data for given interval
+      interval_ledgers = extract_interval_data(ledgers, start_date, end_date)
+      #For chart
+      data = make_chart(result, 'wname', 'credit')
+      return render_template('wholesalers.html',
+                             company=company,
+                             username=username,
+                             referral_code=referral_code,
+                             ledgers=interval_ledgers,
+                             wholesalers=wholesalers,
+                             data=data)
+
+@app.route("/add_wholesaler", methods=["GET", "POST"])
+def add_wsaler():
+    user_id = session.get('user_id')
+    if add_wholesaler(request.form["wname"],
+                  request.form["wcontact"],
+                  request.form["waddress"],
+                  user_id):
+      return redirect("/wholesalers/thisweek")
+
+@app.route("/wholesalers/<wid>/delete")
+def del_ws(wid):
+    if delete_wholesaler(wid):
+      return redirect("/wholesalers/thisweek")  
+
+@app.route("/wholesalers/update", methods=["GET", "POST"])
+def mod_ws():
+    if update_wholesaler(request.form.get('wid'),
+                      request.form.get('wname'),
+                      request.form.get('wcontact'),
+                      request.form.get('waddress'),
+                      request.form.get('onboarded')):
+      return redirect('/wholesalers/thisweek')
+
 #------------------------------- Expenses -------------------------------
+
 @app.route('/expenses/<interval>')
 def show_expenses(interval = "thisweek"):
     user_id = session.get('user_id')

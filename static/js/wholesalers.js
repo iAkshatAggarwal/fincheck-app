@@ -19,13 +19,13 @@ function saveRow(button) {
     // Get the updated values of each cell
     let wid = row.cells[0].textContent;
     let wname = row.cells[2].textContent;
-    let date = row.cells[3].textContent;
-    let credit = row.cells[4].textContent;
-    let debit = row.cells[5].textContent;
+    let wcontact = row.cells[3].textContent;
+    let waddress = row.cells[4].textContent;
+    let onboarded = row.cells[5].textContent;
   
     // Send an AJAX request to update the product
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/ledgers/update");
+    xhr.open("POST", "/wholesalers/update");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onreadystatechange = function() {
       if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -44,5 +44,5 @@ function saveRow(button) {
         }
       }
     };
-  xhr.send(`wid=${wid}&wname=${wname}&date=${date}&credit=${credit}&debit=${debit}`);
+  xhr.send(`wid=${wid}&wname=${wname}&wcontact=${wcontact}&waddress=${waddress}&onboarded=${onboarded}`);
 }

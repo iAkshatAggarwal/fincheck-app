@@ -96,6 +96,12 @@
               </a>
             </li>
             <li class="nav-item">
+              <a class="nav-link" id="wholesalers" href="/wholesalers/thisweek">
+                <span data-feather="shopping-bag" class="align-text-bottom"></span>
+                Wholesalers
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" id="ledgers" href="/ledgers/thisweek">
                 <span data-feather="book" class="align-text-bottom"></span>
                 Ledgers
@@ -168,6 +174,8 @@
         <div class="modal-body">
           <h6>Username: <span class="text-muted">{{username}}</span></h6>
           <h6>Company: <span class="text-muted">{{company}}</span></h6>
+          <h6>Email Address: <span class="text-muted">{{email}}</span></h6>
+          <h6>Subscription: <span class="text-muted">Valid till {{subs_end}}</span></h6>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

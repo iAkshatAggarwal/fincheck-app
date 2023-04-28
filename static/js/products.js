@@ -17,11 +17,11 @@ function editRow(button) {
           let row = button.closest("tr");
         
           // Get the updated values of each cell
-          let pname = row.cells[1].textContent;
-          let pqty = row.cells[2].textContent;
-          let pcp = row.cells[3].textContent;
-          let psp = row.cells[4].textContent;
           let pid = row.cells[0].textContent;
+          let pname = row.cells[2].textContent;
+          let pqty = row.cells[3].textContent;
+          let pcp = row.cells[4].textContent;
+          let psp = row.cells[5].textContent;
         
           // Send an AJAX request to update the product
           let xhr = new XMLHttpRequest();
