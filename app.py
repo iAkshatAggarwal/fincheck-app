@@ -1,10 +1,11 @@
 import os
 import random
-from datetime import datetime
+import datetime
+import razorpay
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
-from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
-from database import add_user, change_password, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
+from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
+from database import add_user, change_password, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
 app.secret_key = os.environ['SECRET_KEY']
@@ -14,6 +15,8 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
+app.config['RAZORPAY_KEY_ID'] = os.environ.get('RAZORPAY_KEY_ID')
+app.config['RAZORPAY_KEY_SECRET'] = os.environ.get('RAZORPAY_KEY_SECRET')
 
 mail = Mail(app)
 
@@ -25,9 +28,7 @@ def index():
 def login():
     if request.method == "POST": 
         users = load_users()
-        user_id, company, username, referral_code, subs_end = authenticate_user(users, 
-                                      request.form["username"], 
-                                      request.form["password"])
+        user_id, company, username, email, referral_code = authenticate_user(users, request.form["username"], request.form["password"])
         if user_id is None: 
             flash('Incorrect Password! Please try again', 'danger')
             redirect(url_for('login'))
@@ -35,8 +36,8 @@ def login():
             session['user_id'] = user_id
             session['company'] = company
             session['username'] = username
+            session['email'] = email
             session['referral_code'] = referral_code
-            session['subs_end'] = subs_end
             flash(f"Welcome to {company}\'s dashboard", 'success')
             return redirect('/dashboard/thismonth') 
     # If request.method = "GET"
@@ -58,10 +59,11 @@ def register():
         session['password'] = request.form["password"]
         session['company'] = request.form["company"]
         session['email'] = request.form['email']
+        username = request.form["username"]
         otp = str(random.randint(1000, 9999))
         session['otp'] = otp
         msg = Message('FinCheck | OTP to Verify Email', sender= os.environ.get('MAIL_USERNAME'), recipients=[request.form['email']])
-        msg.body = f'Verify your email to finish signing up with FinCheck. Use the following verification code: {otp}'
+        msg.body = f"Dear {username},\n\nThank you for signing up for FinCheck! As a part of our account creation process, we have generated a one-time password (OTP) for you to securely access your account. Your OTP is: {otp}\n\nPlease use this OTP to verify your account and complete the sign-up process. If you did not request this OTP, please contact our customer support immediately.\n\nThank you for choosing FinCheck as your financial management partner. We look forward to helping you achieve your financial goals!\n\nBest regards,\nTeam FinCheck "
         mail.send(msg)
         return render_template('login.html', showModal=True)
 
@@ -110,24 +112,75 @@ def change_pass():
 def plans():
     return render_template("subscription.html")
 
-# @app.route('/checkout')
-# def checkout():
-#     client = razorpay.Client(auth=("id","key"))
+@app.route('/checkout/<int:amount>')
+def checkout(amount):
+    username = session.get('username')
+    company = session.get('company')
+    email = session.get('email')
+    referral_code = session.get('referral_code')
+    client = razorpay.Client(auth=(app.config['RAZORPAY_KEY_ID'], app.config['RAZORPAY_KEY_SECRET']))
+    payment = client.order.create({'amount': int(amount*100), 'currency': 'INR', 'payment_capture': '1'})
+    return render_template("altdash.html",
+                           key=app.config['RAZORPAY_KEY_ID'],
+                           payment=payment,
+                           username=username,
+                           company=company,
+                           email=email,
+                           referral_code = referral_code,
+                           showPayModal=True)
+
+@app.route('/payment', methods=['POST'])
+def payment():
+    payment_id = request.form['razorpay_payment_id']
+    client = razorpay.Client(auth=(app.config['RAZORPAY_KEY_ID'], app.config['RAZORPAY_KEY_SECRET']))
+    payment = client.payment.fetch(payment_id)
+    # The payment was successful
+    if payment.get('status') == 'captured':
+        amount = int(payment['amount'])/100
+        user_id = session.get('user_id')
+        username = session.get('username')
+        email = session.get('email')
+        #Update your application database
+        if add_subscription_to_user(user_id, amount): 
+          #send an email notification to the user
+          msg = Message('FinCheck | Payment Successful', sender= os.environ.get('MAIL_USERNAME'), recipients=[email])
+          msg.body = f"""
+Dear {username},
+
+We are delighted to inform you that your payment for \u20B9{amount} to FinCheck has been successfully processed, and we would like to take this opportunity to thank you for choosing our app. Your purchase is greatly appreciated, and we hope that FinCheck will exceed your expectations in managing your finances.
+
+As a valued customer, we would like to remind you that our support team is always available to assist you with any questions or issues that you may encounter while using our app. Please do not hesitate to reach out to us at fincheck.in@gmail.com.
+
+Once again, thank you for your purchase, and we hope that you find FinCheck to be a valuable tool in managing your finances.
+
+Best regards,
+Team FinCheck"""
+          mail.send(msg)
+          flash('Payment Successful', 'success')
+          return redirect("/dashboard/thismonth")
+    else:
+        # The payment failed or was cancelled
+        flash('Payment Failed', 'danger')
+        return redirect("/dashboard/thismonth")
+
           
 #------------------------------- Dashboard -------------------------------
 
 @app.route('/dashboard/<interval>')
 def dashboard(interval="today"):
     # check if user is authenticated
+    users = load_users()
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
     referral_code = session.get('referral_code')
-    subs_end = session.get('subs_end')
+    subs_end = get_subs_end(users, user_id)
+    print(subs_end)
+    utc_now = datetime.datetime.now()
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
-    elif subs_end is None or subs_end < datetime.utcnow(): #If user has not subscribed
+    elif subs_end is None or subs_end < utc_now: #If user has not subscribed
         return render_template('altdash.html',
                                company=company,
                                username=username,

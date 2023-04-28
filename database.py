@@ -42,6 +42,27 @@ def change_password(uid, upass):
     )
     return True
 
+def add_subscription_to_user(uid, amount):
+  with engine.connect() as conn:
+    subs_start = datetime.datetime.utcnow()
+    subs_end = datetime.datetime.utcnow()
+    if amount == 699:
+      subs_end = subs_start + datetime.timedelta(days=28)
+    elif amount == 1999:
+      subs_end = subs_start + datetime.timedelta(days=84)
+    elif amount == 7999:
+      subs_end = subs_start + datetime.timedelta(days=365)
+    subscription = 'active'
+    query = text("UPDATE users SET subs_start =:subs_start, subs_end =:subs_end, subscription =:subscription WHERE uid = :uid")
+    conn.execute(query,
+                 {
+                  'uid': uid, 
+                  'subs_start': subs_start, 
+                  'subs_end': subs_end,
+                  'subscription': subscription
+                 }
+    )
+    return True
 
 def load_users():
   with engine.connect() as conn:

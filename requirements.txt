@@ -1,5 +1,6 @@
 Flask
 Flask-Mail
+razorpay
 gunicorn
 sqlalchemy
 pymysql

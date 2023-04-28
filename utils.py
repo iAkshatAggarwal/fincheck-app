@@ -10,7 +10,7 @@ def authenticate_user(users, username, password):
   for user in users:
     # users is a list of dictionary
     if user['uname'] == username and user['upass'] == password:
-      return user['uid'], user['company'], user['uname'], user['referral_code'], user['subs_end']
+      return user['uid'], user['company'], user['uname'], user['email'],  user['referral_code']
   return None, None, None, None, None
 
 def check_existing_user(users, username, email):
@@ -23,6 +23,11 @@ def get_pass_from_uid(users, uid):
   for user in users:
     if user['uid'] == uid:
       return user["upass"]
+
+def get_subs_end(users, uid):
+  for user in users:
+    if user['uid'] == uid:
+      return user['subs_end']
 
 def get_interval_dates(interval, datas):
   end_date =  date.today()

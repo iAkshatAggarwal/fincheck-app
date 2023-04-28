@@ -11,6 +11,15 @@
 {% endblock %}
 
 {% block main %}
+  <!-- To show PayModal after user clicks on a subscription -->
+  {% if showPayModal %}
+  <script>
+    $(window).on('load',function(){
+        $('#payModal').modal('show');
+    });
+  </script>
+  {% endif %}
+  <!-- To show subscriptions to unsubscribed user -->
   {% if showModal %}
   <script>
     $(window).on('load',function(){
@@ -243,7 +252,7 @@
                       <li>Email support</li>
                       <li>Help center access</li>
                     </ul>
-                    <button type="button" id="rzp-button1" class="w-100 btn btn-lg btn-outline-primary"> Get Started</button>
+                    <a class="w-100 btn btn-lg btn-outline-primary" id="rzp-button1" href="/checkout/699">Get Started</a>
                   </div>
                 </div>
               </div>
@@ -260,7 +269,7 @@
                       <li>Priority email support</li>
                       <li>Help center access</li>
                     </ul>
-                    <button type="button" class="w-100 btn btn-lg btn-primary">Get started</button>
+                    <a class="w-100 btn btn-lg btn-primary" href="/checkout/1999">Get Started</a>
                   </div>
                 </div>
               </div>
@@ -277,7 +286,7 @@
                       <li>Phone and email support</li>
                       <li>Help center access</li>
                     </ul>
-                    <button type="button" class="w-100 btn btn-lg btn-primary">Get Started</button>
+                    <a class="w-100 btn btn-lg btn-primary" href="/checkout/7999">Get Started</a>
                   </div>
                 </div>
               </div>
@@ -290,49 +299,63 @@
       </div>
     </div>
   </div>
+  {% if showPayModal %}
+  <!-- Payment Modal -->
+  <div class="modal fade" id="payModal" tabindex="-1" aria-labelledby="payModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="payModalLabel">Pay for Subscription</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <button class="btn btn-success" onclick="openCheckout()">Proceed to pay</button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 {% endblock %}
 
 {% block script %}
   <script>feather.replace({ 'aria-hidden': 'true' })</script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  {% if showPayModal %}
   <script>
-  var options = {
-      "key": "{{key}}", // Enter the Key ID generated from the Dashboard
-      "amount": "69900", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-      "currency": "INR",
-      "name": "FinCheck", //your business name
-      "description": "Test Transaction",
-      "image": "{{url_for('static', filename='/shark.png')}}",
-      "order_id": "{{order_id}}", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-      "handler": function (response){
-          alert(response.razorpay_payment_id);
-          alert(response.razorpay_order_id);
-          alert(response.razorpay_signature)
-      },
-      "prefill": {
-          "name": "{{username}}", //your customer's name
-          "email": "{{email}}"
-      },
-      "notes": {
-          "address": "Razorpay Corporate Office"
-      },
-      "theme": {
-          "color": "#3399cc"
-      }
-  };
-  var rzp1 = new Razorpay(options);
-  rzp1.on('payment.failed', function (response){
-          alert(response.error.code);
-          alert(response.error.description);
-          alert(response.error.source);
-          alert(response.error.step);
-          alert(response.error.reason);
-          alert(response.error.metadata.order_id);
-          alert(response.error.metadata.payment_id);
-  });
-  document.getElementById('rzp-button1').onclick = function(e){
-      rzp1.open();
-      e.preventDefault();
-  }
+    const modal = document.querySelector('#payModal');
+    modal.style.display = "none";
+    function openCheckout() {
+        // Set your Razorpay API key and order details
+        var options = {
+            "key": "{{ key }}",
+            "amount": "{{ payment['amount'] }}",
+            "currency": "{{ payment['currency'] }}",
+            "name": "FinCheck",
+            "description": "Payment for order #{{ payment['id'] }}",
+            "image": "{{url_for('static', filename='/shark.png')}}",
+            "order_id": "{{ payment['id'] }}",
+            "handler": function (response) {
+                // Send the successful payment response to your server
+                var payment_id = response.razorpay_payment_id;
+                var url = "/payment";
+                var data = { razorpay_payment_id: payment_id };
+                $.post(url, data, function(response) {
+                    window.location.href = '/dashboard/thismonth';
+                });
+            },
+            "prefill": {
+                "name": "{{ username }}",
+                "email": "{{ email }}"
+            }
+        };
+    
+        // Open the Razorpay checkout form
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+    }
   </script>
+  {% endif %}
 {% endblock %}
