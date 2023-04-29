@@ -119,14 +119,14 @@
     // Create the chart using Chart.js
     var ctx = document.getElementById('myChart').getContext('2d');
     var myChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: data.labels,
             datasets: [{
                 label: 'Expenses',
                 data: data.values,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(255, 100, 100, 0.7)',
+                borderColor: 'rgba(265, 100, 100, 1)',
                 borderWidth: 1
             }]
         },

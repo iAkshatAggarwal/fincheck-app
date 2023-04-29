@@ -198,8 +198,8 @@ def top_products(sales):
             product_dict[name] = {'name': name, 'qty': qty, 'profit': profit}
 
     # Sort the products by quantity and profit in descending order and take the top 10
-    sorted_products_qty = sorted(product_dict.values(), key=lambda x: x['qty'], reverse=True)[:10]
-    sorted_products_profit = sorted(product_dict.values(), key=lambda x: x['profit'], reverse=True)[:10]
+    sorted_products_qty = sorted(list(product_dict.values()), key=lambda x: (-x['qty'], -x['profit']))[:10]
+    sorted_products_profit = sorted(list(product_dict.values()), key=lambda x: (-x['profit'], -x['qty']))[:10]
 
     # Return separate lists of dictionaries for the top products by quantity and profit
     return (sorted_products_qty, sorted_products_profit)
