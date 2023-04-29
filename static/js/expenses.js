@@ -18,9 +18,9 @@ function saveRow(button) {
   
     // Get the updated values of each cell
     let id = row.cells[0].textContent;
-    let date = row.cells[1].textContent;
-    let type = row.cells[2].textContent;
-    let eprice = row.cells[3].textContent;
+    let date = row.cells[2].textContent;
+    let type = row.cells[3].textContent;
+    let eprice = row.cells[4].textContent;
   
     // Send an AJAX request to update the product
     let xhr = new XMLHttpRequest();
