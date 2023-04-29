@@ -4,7 +4,7 @@ import datetime
 import razorpay
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
-from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
+from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_userid_from_email, check_email_in_users, get_forgot_pass_msg, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
 from database import add_user, change_password, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, delete_wholesaler, update_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
@@ -19,6 +19,11 @@ app.config['RAZORPAY_KEY_ID'] = os.environ.get('RAZORPAY_KEY_ID')
 app.config['RAZORPAY_KEY_SECRET'] = os.environ.get('RAZORPAY_KEY_SECRET')
 
 mail = Mail(app)
+
+@app.after_request
+def add_header(response):
+    response.cache_control.no_store = True
+    return response
 
 @app.route('/')
 def index():
@@ -82,15 +87,21 @@ def verify():
     if request.method == 'POST':
         user_otp = request.form['otp']
         if user_otp == session['otp']:
-            referral_code = get_referral_code()
-            if add_user(session['username'], 
-                    session['password'],
-                    session['company'] ,
-                    session['email'],
-                    referral_code):
-              session.clear()
-              flash('Registration successful!', 'success')
-              return redirect("/login")
+            users = load_users()
+            email = session.get('email')
+            if check_email_in_users(users, email):
+              return render_template('login.html', showNewPassModal=True)
+
+            else:
+              referral_code = get_referral_code()
+              if add_user(session['username'], 
+                      session['password'],
+                      session['company'] ,
+                      session['email'],
+                      referral_code):
+                session.clear()
+                flash('Registration successful!', 'success')
+                return redirect("/login")
         else:
             flash('Invalid OTP! Try again', 'danger')
             redirect(url_for('login'))
@@ -99,14 +110,38 @@ def verify():
 def change_pass():
     if request.method == "POST": 
       users = load_users()
-      user_id = session.get('user_id')
-      if request.form["old-pass"] == get_pass_from_uid(users, user_id) and request.form["new-pass"] == request.form["re-new-pass"]:
-        if change_password(user_id, request.form["new-pass"]):
-          flash('Password changed successfully', 'success')
-          return redirect("/dashboard/thismonth")
+      if session.get('user_id') is None:
+        email = session.get('email')
+        user_id = get_userid_from_email(users,email)
+        if  request.form["new-pass"] == request.form["re-new-pass"]:
+          if change_password(user_id, request.form["new-pass"]):
+            flash('Password changed successfully', 'success')
+            return redirect("/login")
       else:
-          flash('Password change failed. Please try again', 'danger')
-          return redirect("/dashboard/thismonth")
+        user_id = session.get('user_id')
+        if request.form["old-pass"] == get_pass_from_uid(users, user_id) and request.form["new-pass"] == request.form["re-new-pass"]:
+          if change_password(user_id, request.form["new-pass"]):
+            flash('Password changed successfully', 'success')
+            return redirect("/dashboard/thismonth")
+        else:
+            flash('Password change failed. Please try again', 'danger')
+            return redirect("/dashboard/thismonth")
+
+@app.route('/forgot-password', methods=["POST"])
+def forgot_pass():
+    if request.method == "POST": 
+      users = load_users()
+      session['email'] = request.form['email']
+      if check_email_in_users(users, request.form["email"]):
+          otp = str(random.randint(1000, 9999))
+          session['otp'] = otp
+          msg = Message('FinCheck | Forgot Password', sender= os.environ.get('MAIL_USERNAME'), recipients=[request.form['email']])
+          msg.body = get_forgot_pass_msg(otp)
+          mail.send(msg)
+          return render_template('login.html', showModal=True)
+      else:
+          flash('Entered email id does not exists!', 'danger')
+          return redirect("/login")
 
 @app.route('/plans')
 def plans():

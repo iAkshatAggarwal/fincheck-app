@@ -29,6 +29,19 @@ def get_subs_end(users, uid):
     if user['uid'] == uid:
       return user['subs_end']
 
+def get_userid_from_email(users,email):
+  for user in users:
+    if user['email'] == email:
+      return user['uid']
+
+def check_email_in_users(users, email):
+  for user in users:
+    if user['email'] == email:
+      return True
+
+def get_forgot_pass_msg(otp):
+  return f"Dear valued user,\n\nWe have noticed that you have forgotten your password for your FinCheck account. We understand that this can be a frustrating experience and we want to help you regain access to your account as soon as possible.\n\nTo ensure the security of your account, we have generated a one-time password (OTP) that you can use to reset your password. Please enter the OTP within the FinCheck platform to generate a new password.\n\nYour OTP is: {otp}\n\nPlease note that this OTP is valid only for a limited time period. If you do not use it within the specified timeframe, you will need to request a new OTP.\n\nWe take the security of our users' accounts very seriously and we want to assure you that all necessary measures have been taken to protect your account information.\n\nIf you have any questions or concerns, please do not hesitate to contact us. We are always here to help.\n\nBest regards,\n\nTeam FinCheck"
+
 def get_interval_dates(interval, datas):
   end_date =  date.today()
   start_date = date.today()
