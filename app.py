@@ -194,6 +194,8 @@ def dashboard(interval="today"):
       sales = load_sales(user_id)
       expenses = load_expenses(user_id)
       products = load_inventory(user_id)
+      ledgers = load_ledgers(user_id)
+      wholesalers = load_wholesalers(user_id)
       # Assigning interval dates
       start_date, end_date = get_interval_dates(interval, sales)
       #Extract Sales data for given interval
@@ -231,6 +233,13 @@ def dashboard(interval="today"):
       # For Daily Expenses Chart
       daily_expenses = add_expenses_by_dates(interval_expenses)
       daily_expenses_data = make_chart(daily_expenses, 'date', 'eprice')
+      #For Unpaid Customers Chart
+      unpaid_customers = get_unpaid_customers(sales)
+      unpaid_customers_output = add_amt_unpaid_customers(unpaid_customers) 
+      unpaid_customers_data = make_chart(unpaid_customers_output, 'customer', 'sale_amt')
+      #For Wholesalers chart
+      wholesaler_credits = get_latest_credits(ledgers)
+      wholesalers_data = make_chart(wholesaler_credits, 'wname', 'credit')
       #Top Products
       top_products_qty, top_products_profit = top_products(sales)
       
@@ -254,6 +263,8 @@ def dashboard(interval="today"):
                              daily_sales_data=daily_sales_data,
                              category_expenses_data=category_expenses_data,
                              daily_expenses_data=daily_expenses_data,
+                             unpaid_customers_data=unpaid_customers_data,
+                             wholesalers_data=wholesalers_data,
                              top_products_qty=top_products_qty,
                              top_products_profit=top_products_profit)
 
@@ -394,7 +405,7 @@ def show_ledgers(interval="today"):
       result = get_latest_credits(ledgers)
       # Assigning interval dates
       start_date, end_date = get_interval_dates(interval, ledgers)
-      #Extract expenses data for given interval
+      #Extract ledger data for given interval
       interval_ledgers = extract_interval_data(ledgers, start_date, end_date)
       #For chart
       data = make_chart(result, 'wname', 'credit')

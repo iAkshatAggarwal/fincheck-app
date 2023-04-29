@@ -40,7 +40,7 @@ def get_interval_dates(interval, datas):
     month = end_date.month - 3 if end_date.month > 3 else end_date.month + 9
     start_date = date(end_date.year, month, 1) - timedelta(days=1)
   elif interval == 'thisyear':
-    start_date = end_date.replace(year=end_date.year - 1)
+        start_date = date(end_date.year, 1, 1)
   elif interval == 'alltime':
     start_date = min(data['date'] for data in datas)
   return start_date, end_date

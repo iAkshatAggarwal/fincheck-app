@@ -68,7 +68,13 @@
         <div class="card mb-4 rounded-3 shadow-sm">
           <div class="card-body">
             <h3 class="card-title pricing-card-title">Gross Margin</h3>
-            <h4 class="text-muted fw-light">&#x20b9;{{g_margin}} ({{perc_gmargin}})</h4>
+            <h4 class="text-muted fw-light">&#x20b9;{{g_margin}}
+              {% if perc_gmargin|int >= 0 %}
+                <span class="text-success">({{ perc_gmargin }})</span>
+              {% else %}
+                <span class="text-danger">({{ perc_gmargin }})</span>
+              {% endif %}
+            </h4>
           </div>
         </div>
       </div>
@@ -76,7 +82,7 @@
         <div class="card mb-4 rounded-3 shadow-sm">
           <div class="card-body">
             <h3 class="card-title pricing-card-title">Gross Expenditure</h3>
-            <h4 class="text-muted fw-light">&#x20b9;{{g_expenses}}</h4>
+            <h4 class="text-danger fw-light">&#x20b9;{{g_expenses}}</h4>
           </div>
         </div>
       </div>
@@ -86,7 +92,11 @@
         <div class="card mb-4 rounded-3 shadow-sm">
           <div class="card-body">
             <h3 class="card-title pricing-card-title">Net Revenue</h3>
-            <h4 class="text-muted fw-light">&#x20b9;{{n_revenue}}</h4>
+            {% if n_revenue|int >= 0 %}
+              <h4 class="text-success fw-light">&#x20b9;{{n_revenue}}</h4>
+            {% else %}
+              <h4 class="text-danger fw-light">&#x20b9;{{n_revenue}}</h4>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -102,7 +112,11 @@
         <div class="card mb-4 rounded-3 shadow-sm">
           <div class="card-body">
             <h3 class="card-title pricing-card-title">EBITDA</h3>
-            <h4 class="text-muted fw-light">{{ebitda}}</h4>
+            {% if ebitda|int >= 0 %}
+              <h4 class="text-success fw-light">{{ebitda}}</h4>
+            {% else %}
+              <h4 class="text-danger fw-light">{{ebitda}}</h4>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -174,6 +188,24 @@
     <div class="col">
       <div class="card mb-4 rounded-3 shadow-sm">
         <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Wholesalers Dues</h3>
+          <canvas class="my-4 w-100" id="myChart4" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title pricing-card-title"> Customers Dues</h3>
+          <canvas class="my-4 w-100" id="myChart5" width="900" height="380"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2 mt-5">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
           <h3 class="card-title pricing-card-title"> Top Products by Quantity </h3>
           <div class="table-responsive">
             <table class="table table-sm mt-2">
@@ -236,6 +268,8 @@
     var daily_sales_data = JSON.parse('{{ daily_sales_data | tojson | safe }}');
     var category_expenses_data = JSON.parse('{{ category_expenses_data | tojson | safe }}');
     var daily_expenses_data = JSON.parse('{{ daily_expenses_data | tojson | safe }}');
+    var unpaid_customers_data = JSON.parse('{{ unpaid_customers_data | tojson | safe }}');
+    var wholesalers_data = JSON.parse('{{ wholesalers_data | tojson | safe }}');
     
     // Create the chart using Chart.js
     // Monthly Sales Chart
@@ -340,6 +374,56 @@
                 data: daily_expenses_data.values,
                 backgroundColor: 'rgba(255, 100, 100, 0.7)',
                 borderColor: 'rgba(265, 100, 100, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    // Wholesaler Dues
+    var ctx4 = document.getElementById('myChart4').getContext('2d');
+    var myChart = new Chart(ctx4, {
+        type: 'bar',
+        data: {
+            labels: wholesalers_data.labels,
+            datasets: [{
+                label: 'Credits',
+                data: wholesalers_data.values,
+                backgroundColor: 'rgba(150, 20, 20, 0.8)',
+                borderColor: 'rgba(150, 20, 20, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    //Customer Dues Chart
+    var ctx5 = document.getElementById('myChart5').getContext('2d');
+    var myChart = new Chart(ctx5, {
+        type: 'bar',
+        data: {
+            labels: unpaid_customers_data.labels,
+            datasets: [{
+                label: 'Unpaid Customers',
+                data: unpaid_customers_data.values,
+                backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                borderColor: 'rgba(255, 206, 86, 1)',
                 borderWidth: 1
             }]
         },
