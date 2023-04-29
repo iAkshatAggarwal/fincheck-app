@@ -145,16 +145,7 @@ def payment():
           #send an email notification to the user
           msg = Message('FinCheck | Payment Successful', sender= os.environ.get('MAIL_USERNAME'), recipients=[email])
           msg.body = f"""
-Dear {username},
-
-We are delighted to inform you that your payment for \u20B9{amount} to FinCheck has been successfully processed, and we would like to take this opportunity to thank you for choosing our app. Your purchase is greatly appreciated, and we hope that FinCheck will exceed your expectations in managing your finances.
-
-As a valued customer, we would like to remind you that our support team is always available to assist you with any questions or issues that you may encounter while using our app. Please do not hesitate to reach out to us at fincheck.in@gmail.com.
-
-Once again, thank you for your purchase, and we hope that you find FinCheck to be a valuable tool in managing your finances.
-
-Best regards,
-Team FinCheck"""
+Dear {username},\n\nWe are delighted to inform you that your payment for \u20B9{amount} to FinCheck has been successfully processed, and we would like to take this opportunity to thank you for choosing our app. Your purchase is greatly appreciated, and we hope that FinCheck will exceed your expectations in managing your finances.\n\nAs a valued customer, we would like to remind you that our support team is always available to assist you with any questions or issues that you may encounter while using our app. Please do not hesitate to reach out to us at fincheck.in@gmail.com.\n\nOnce again, thank you for your purchase, and we hope that you find FinCheck to be a valuable tool in managing your finances.\n\nBest regards,\nTeam FinCheck"""
           mail.send(msg)
           flash('Payment Successful', 'success')
           return redirect("/dashboard/thismonth")
@@ -195,7 +186,6 @@ def dashboard(interval="today"):
       expenses = load_expenses(user_id)
       products = load_inventory(user_id)
       ledgers = load_ledgers(user_id)
-      wholesalers = load_wholesalers(user_id)
       # Assigning interval dates
       start_date, end_date = get_interval_dates(interval, sales)
       #Extract Sales data for given interval
