@@ -35,6 +35,8 @@ def get_signup_otp_msg(username,otp):
 def get_payment_success_msg(username,amount):
   return f"Dear {username},\n\nWe are delighted to inform you that your payment for \u20B9{amount} to FinCheck has been successfully processed, and we would like to take this opportunity to thank you for choosing our app. Your purchase is greatly appreciated, and we hope that FinCheck will exceed your expectations in managing your finances.\n\nAs a valued customer, we would like to remind you that our support team is always available to assist you with any questions or issues that you may encounter while using our app. Please do not hesitate to reach out to us at fincheck.in@gmail.com.\n\nOnce again, thank you for your purchase, and we hope that you find FinCheck to be a valuable tool in managing your finances.\n\nBest regards,\nTeam FinCheck"
 
+def get_update_email_msg(username,otp):
+  return f"Dear {username},\n\nWe have received a request from you to update your email address on FinCheck. To ensure the security of your account, we need to verify your new email address.\n\nPlease use the following One-Time Password (OTP) to complete the verification process:\n\nOTP: {otp}\n\nPlease enter this OTP in the designated field on the verification page. This OTP is valid for the next 10 minutes only. If you do not enter the OTP within this time frame, you will need to request a new one.\n\nIf you did not initiate this request, please contact our customer support team immediately.\n\nThank you for your cooperation.\n\nBest regards,\nTeam FinCheck"
   
 def get_userid_from_email(users,email):
   for user in users:
@@ -43,7 +45,7 @@ def get_userid_from_email(users,email):
 
 def check_email_in_users(users, email):
   for user in users:
-    if user['email'] == email:
+    if user['email'] == email and user['email'] is not None:
       return True
 
 def get_forgot_pass_msg(otp):

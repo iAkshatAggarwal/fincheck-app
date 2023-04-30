@@ -42,6 +42,17 @@ def change_password(uid, upass):
     )
     return True
 
+def update_email_address(uid, email):
+  with engine.connect() as conn:
+    query = text("UPDATE users SET email= :email where uid= :uid")
+    conn.execute(query,
+                 { 
+                  'uid': uid, 
+                  'email': email
+                 }
+    )
+    return True
+
 def add_subscription_to_user(uid, amount):
   with engine.connect() as conn:
     subs_start = datetime.datetime.utcnow()

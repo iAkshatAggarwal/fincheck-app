@@ -169,11 +169,38 @@
         <div class="modal-body">
           <h6>Username: <span class="text-muted">{{username}}</span></h6>
           <h6>Company: <span class="text-muted">{{company}}</span></h6>
-          <h6>Email Address: <span class="text-muted">{{email}}</span></h6>
+          <h6>Email Address: 
+            <span class="text-muted">{{email}} 
+              <span class="badge rounded-pill text-bg-primary text-right" data-bs-toggle="modal" data-bs-target="#updateEmailModal">Update</span>
+            </span>
+          </h6>
           <h6>Subscription: <span class="text-muted">Valid till {{subs_end}}</span></h6>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Update Email Modal -->
+  <div class="modal fade" id="updateEmailModal" tabindex="-1" aria-labelledby="updateEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="updateEmailModalLabel">Update Email Address</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/update-email" method="POST">
+            <div class="mb-3">
+              <label for="new-email" class="col-form-label">Email Address</label>
+              <input type="email" class="form-control" name="new-email" id="new-email">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button class="btn btn-primary" type="submit">Get OTP</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

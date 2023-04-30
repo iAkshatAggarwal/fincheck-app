@@ -4,8 +4,8 @@ import datetime
 import razorpay
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
-from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_signup_otp_msg, get_payment_success_msg, get_userid_from_email, check_email_in_users, get_forgot_pass_msg, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
-from database import add_user, change_password, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, delete_wholesaler, update_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
+from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_signup_otp_msg, get_payment_success_msg, get_update_email_msg, get_userid_from_email, check_email_in_users, get_forgot_pass_msg, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
+from database import add_user, change_password, update_email_address, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, delete_wholesaler, update_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
 app.secret_key = os.environ['SECRET_KEY']
@@ -35,7 +35,7 @@ def login():
         users = load_users()
         user_id, company, username, email, referral_code = authenticate_user(users, request.form["username"], request.form["password"])
         if user_id is None: 
-            flash('Incorrect Password! Please try again', 'danger')
+            flash('Incorrect Password! Try again', 'danger')
             redirect(url_for('login'))
         else:
             session['user_id'] = user_id
@@ -92,7 +92,7 @@ def verify():
             if check_email_in_users(users, email):
               return render_template('login.html', showNewPassModal=True)
 
-            else:
+            elif session.get('referral_code') is None: #New Sign up
               referral_code = get_referral_code()
               if add_user(session['username'], 
                       session['password'],
@@ -102,6 +102,15 @@ def verify():
                 session.clear()
                 flash('Registration successful!', 'success')
                 return redirect("/login")
+
+            else:
+              user_id = session.get('user_id')
+              email = session.get('new-email')
+              if update_email_address(user_id, email):
+                session.clear()
+                flash('Email Update Successful!', 'success')
+                return redirect("/login")
+              
         else:
             flash('Invalid OTP! Try again', 'danger')
             redirect(url_for('login'))
@@ -143,6 +152,19 @@ def forgot_pass():
       else:
           flash('Entered email id does not exists!', 'danger')
           return redirect("/login")
+
+@app.route('/update-email', methods=["POST"])
+def update_email():
+    if request.method == "POST": 
+        otp = str(random.randint(1000, 9999))
+        session['otp'] = otp
+        session['new-email'] = request.form['new-email']
+        username = session.get('username')
+        referral_code = session.get('referral_code')
+        msg = Message('FinCheck | Update Email Address', sender= os.environ.get('MAIL_USERNAME'), recipients=[request.form['new-email']])
+        msg.body = get_update_email_msg(username,otp)
+        mail.send(msg)
+        return render_template('login.html', showModal=True)
 
 @app.route('/plans')
 def plans():

@@ -10,6 +10,13 @@
 {% endblock %}
 
 {% block main %}
+  {% if showotpModal %}
+    <script>
+      $(window).on('load',function(){
+          $('#updateEmailOTPModal').modal('show');
+      });
+    </script>
+  {% endif %}
   <!-- To intimidate whether password is changed successfully or not -->
   {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
