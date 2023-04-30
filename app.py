@@ -4,7 +4,7 @@ import datetime
 import razorpay
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
-from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_userid_from_email, check_email_in_users, get_forgot_pass_msg, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
+from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_signup_otp_msg, get_payment_success_msg, get_userid_from_email, check_email_in_users, get_forgot_pass_msg, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
 from database import add_user, change_password, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, delete_wholesaler, update_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
@@ -68,7 +68,7 @@ def register():
         otp = str(random.randint(1000, 9999))
         session['otp'] = otp
         msg = Message('FinCheck | OTP to Verify Email', sender= os.environ.get('MAIL_USERNAME'), recipients=[request.form['email']])
-        msg.body = f"Dear {username},\n\nThank you for signing up for FinCheck! As a part of our account creation process, we have generated a one-time password (OTP) for you to securely access your account. Your OTP is: {otp}\n\nPlease use this OTP to verify your account and complete the sign-up process. If you did not request this OTP, please contact our customer support immediately.\n\nThank you for choosing FinCheck as your financial management partner. We look forward to helping you achieve your financial goals!\n\nBest regards,\nTeam FinCheck "
+        msg.body = get_signup_otp_msg(username,otp)
         mail.send(msg)
         return render_template('login.html', showModal=True)
 
@@ -110,11 +110,12 @@ def verify():
 def change_pass():
     if request.method == "POST": 
       users = load_users()
-      if session.get('user_id') is None:
+      if session.get('user_id') is None: # User forgot password
         email = session.get('email')
         user_id = get_userid_from_email(users,email)
         if  request.form["new-pass"] == request.form["re-new-pass"]:
           if change_password(user_id, request.form["new-pass"]):
+            session.clear()
             flash('Password changed successfully', 'success')
             return redirect("/login")
       else:
@@ -179,8 +180,7 @@ def payment():
         if add_subscription_to_user(user_id, amount): 
           #send an email notification to the user
           msg = Message('FinCheck | Payment Successful', sender= os.environ.get('MAIL_USERNAME'), recipients=[email])
-          msg.body = f"""
-Dear {username},\n\nWe are delighted to inform you that your payment for \u20B9{amount} to FinCheck has been successfully processed, and we would like to take this opportunity to thank you for choosing our app. Your purchase is greatly appreciated, and we hope that FinCheck will exceed your expectations in managing your finances.\n\nAs a valued customer, we would like to remind you that our support team is always available to assist you with any questions or issues that you may encounter while using our app. Please do not hesitate to reach out to us at fincheck.in@gmail.com.\n\nOnce again, thank you for your purchase, and we hope that you find FinCheck to be a valuable tool in managing your finances.\n\nBest regards,\nTeam FinCheck"""
+          msg.body = get_payment_success_msg(username,amount)
           mail.send(msg)
           flash('Payment Successful', 'success')
           return redirect("/dashboard/thismonth")

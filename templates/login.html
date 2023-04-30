@@ -58,32 +58,29 @@
               {% endfor %}
           {% endif %}
       {% endwith %}
-      <form action="/login" method="POST">
+      <form class="needs-validation" novalidate action="/login" method="POST">
         <a class="mx-auto" href="/">
           <img src="/static/shark.png" width="60">
         </a>
         <h1 class="mt-3">FinCheck</h1>
         <p>Business Analytics just became easy!</p>
         <div class="form-floating">
-          <input type="text" class="form-control" name="username" placeholder="Jim Halpert">
+          <input type="text" class="form-control" name="username" placeholder="Username">
           <label for="floatingInput">Username</label>
         </div>
         <div class="form-floating">
           <input type="password" class="form-control" name="password" placeholder="Password">
           <label for="floatingPassword">Password</label>
         </div>
-    
-        </div>
         <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
         <div class="mt-3">
           <p>Don't have an account? <a class="mx-auto" style="text-decoration: none;" href="#" data-bs-toggle="modal" data-bs-target="#modalSignin">Sign up</a></p>
+          <a class="mx-auto" style="text-decoration: none;" href="#" data-bs-toggle="modal" data-bs-target="#modalForgotPass">Forgot Password?</a>
         </div>
-        <div style="text-align: right;">
-          <a style="margin-right:35px; text-decoration: none;" href="#" data-bs-toggle="modal" data-bs-target="#modalForgotPass">Forgot Password?</a>
-        </div>
-        <p class="mt-5 mb-3 text-muted">&copy;2023 FinCheck, Inc</p>
+        <p class="mt-3 mb-3 text-muted">&copy;2023 FinCheck, Inc</p>
       </form>
     </main>
+    
     <!-- Modal for sign up -->
     <div class="modal fade" tabindex="-1" id="modalSignin" aria-labelledby="modalSigninLabel" aria-hidden="true">
       <div class="modal-sheet position-static d-block bg-body-secondary p-4 py-md-5">
@@ -105,21 +102,21 @@
                 </div>
                 <div class="form-floating mb-1">
                   <input type="company" class="form-control rounded-3" id="floatingCompany"  name="company" placeholder="Company Name" required>
-                  <label for="floatingPassword">Company Name</label>
+                  <label for="floatingCompany">Company Name</label>
                 </div>
                 <div class="form-floating mb-3">
                   <input type="email" class="form-control rounded-3" id="floatingEmail" name="email" placeholder="Email Address" required>
-                  <label for="floatingInput">Email address</label>
+                  <label for="floatingEmail">Email address</label>
                 </div>
                 <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Sign up</button>
                 <small class="text-body-secondary">By clicking Sign up, you agree to the terms of use.</small>
                 <hr class="my-4">
                 <h2 class="fs-5 fw-bold mb-3">Or use a third-party</h2>
-                <button class="w-100 py-2 mb-2 btn btn-outline-success rounded-3" type="submit">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16">
-  <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                <button class="w-100 py-2 mb-2 btn btn-outline-danger rounded-3" type="submit">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-google" viewBox="0 0 16 16">
+                    <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z"/>
                   </svg>
-                  <span style="margin-left:5px;">Sign up with WhatsApp</span>
+                  <span style="margin-left:5px;">Sign up with Google</span>
                 </button>
               </form>
             </div>
@@ -127,6 +124,7 @@
         </div>
       </div>
     </div>
+    
     <!-- OTP Modal -->
     <div class="modal fade" id="otpModal" aria-hidden="true" aria-labelledby="otpModalToggleLabel" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
@@ -136,19 +134,19 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <small class="text-body-secondary mb-2">An OTP has been sent to given email address.</small>
+            <small class="text-body-secondary mb-4">An OTP has been sent to given email address.</small>
             <form class="needs-validation" novalidate action="/verify" method="POST">
-              <div class="form-floating mb-1">
+              <div class="form-floating mb-4">
                 <input type="text" class="form-control rounded-3" name="otp" placeholder="OTP" required>
                 <label for="floatingInput">Enter OTP</label>
               </div>
-          </div>
-          <div class="modal-footer">
-            <button class="w-100 mb-2 btn btn-lg rounded-3 btn-success" type="submit">Verify</button>
+              <button class="w-100 mb-2 btn btn-lg rounded-3 btn-success" type="submit">Verify OTP</button>
+            </form>
           </div>
         </div>
       </div>
     </div>
+    
     <!-- Forgot Password Modal -->
     <div class="modal fade" tabindex="-1" id="modalForgotPass" aria-labelledby="modalForgotPassLabel" aria-hidden="true">
       <div class="modal-sheet position-static d-block bg-body-secondary p-4 py-md-5">
@@ -159,10 +157,10 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-5 pt-0">
-              <form class="needs-validation" novalidate action="/forgot-password" method="POST">
+              <form action="/forgot-password" method="POST">
                 <div class="form-floating mb-3">
                   <input type="email" class="form-control rounded-3" id="floatingEmail1" name="email" placeholder="Email Address" required>
-                  <label for="floatingInput">Email address</label>
+                  <label for="floatingEmail1">Email Address</label>
                 </div>
                 <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Generate OTP</button>
               </form>
@@ -183,12 +181,12 @@
             <div class="modal-body p-5 pt-0">
               <form class="needs-validation" novalidate action="/change-password" method="POST">
                 <div class="form-floating mb-3">
-                  <input type="email" class="form-control rounded-3" id="floatingEmail2" name="new-pass" placeholder="New Password" required>
-                  <label for="floatingInput">New Password</label>
+                  <input type="text" class="form-control rounded-3" id="floatingPass" name="new-pass" placeholder="New Password" required>
+                  <label for="floatingPass">New Password</label>
                 </div>
                 <div class="form-floating mb-3">
-                  <input type="email" class="form-control rounded-3" id="floatingEmail3" name="re-new-pass" placeholder="Confirm Password" required>
-                  <label for="floatingInput">Confirm Password</label>
+                  <input type="text" class="form-control rounded-3" id="floatingNewPass" name="re-new-pass" placeholder="Confirm Password" required>
+                  <label for="floatingNewPass">Confirm Password</label>
                 </div>
                 <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Submit</button>
               </form>

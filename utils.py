@@ -29,6 +29,13 @@ def get_subs_end(users, uid):
     if user['uid'] == uid:
       return user['subs_end']
 
+def get_signup_otp_msg(username,otp):
+  return f"Dear {username},\n\nThank you for signing up for FinCheck! As a part of our account creation process, we have generated a one-time password (OTP) for you to securely access your account. Your OTP is: {otp}\n\nPlease use this OTP to verify your account and complete the sign-up process. If you did not request this OTP, please contact our customer support immediately.\n\nThank you for choosing FinCheck as your financial management partner. We look forward to helping you achieve your financial goals!\n\nBest regards,\nTeam FinCheck "
+
+def get_payment_success_msg(username,amount):
+  return f"Dear {username},\n\nWe are delighted to inform you that your payment for \u20B9{amount} to FinCheck has been successfully processed, and we would like to take this opportunity to thank you for choosing our app. Your purchase is greatly appreciated, and we hope that FinCheck will exceed your expectations in managing your finances.\n\nAs a valued customer, we would like to remind you that our support team is always available to assist you with any questions or issues that you may encounter while using our app. Please do not hesitate to reach out to us at fincheck.in@gmail.com.\n\nOnce again, thank you for your purchase, and we hope that you find FinCheck to be a valuable tool in managing your finances.\n\nBest regards,\nTeam FinCheck"
+
+  
 def get_userid_from_email(users,email):
   for user in users:
     if user['email'] == email:
