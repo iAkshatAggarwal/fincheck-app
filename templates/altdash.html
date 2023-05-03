@@ -281,7 +281,7 @@
                       <li>Help center access</li>
                     </ul>
                     <!-- <a class="w-100 btn btn-lg btn-outline-primary" href="/checkout/699">Get Started</a> -->
-                    <a class="w-100 btn btn-lg btn-outline-primary" href="#">Get Started</a>
+                    <a class="w-100 btn btn-lg btn-outline-primary" href="#" data-bs-target="#qrcodeModal" data-bs-toggle="modal">Get Started</a>
                   </div>
                 </div>
               </div>
@@ -299,7 +299,7 @@
                       <li>Help center access</li>
                     </ul>
                     <!-- <a class="w-100 btn btn-lg btn-primary" href="/checkout/1999">Get Started</a> -->
-                    <a class="w-100 btn btn-lg btn-primary" href="#">Get Started</a>
+                    <a class="w-100 btn btn-lg btn-primary" href="#" data-bs-target="#qrcodeModal" data-bs-toggle="modal">Get Started</a>
                   </div>
                 </div>
               </div>
@@ -317,7 +317,7 @@
                       <li>Help center access</li>
                     </ul>
                     <!-- <a class="w-100 btn btn-lg btn-primary" href="/checkout/7999">Get Started</a> -->
-                    <a class="w-100 btn btn-lg btn-primary" href="#">Get Started</a>
+                    <a class="w-100 btn btn-lg btn-primary" href="#" data-bs-target="#qrcodeModal" data-bs-toggle="modal">Get Started</a>
                   </div>
                 </div>
               </div>
@@ -349,6 +349,23 @@
     </div>
   </div>
   {% endif %}
+  <div class="modal fade" id="qrcodeModal" tabindex="-1" aria-labelledby="qrcodeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="qrcodeLabel">Pay for Subscription</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container py-3 justify-content-center">
+            <p class="fs-5">Payment Gateway KYC under process.<br/>Till then, Whatsapp the payment to the given number and after verification your subscription will be activated within an hour!</p>
+            <div style="text-align: center;">
+              <img src="/static/paytm.jpeg" class="img-fluid animated d-inline align-middle" alt="" width="250" height="250">
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block script %}
