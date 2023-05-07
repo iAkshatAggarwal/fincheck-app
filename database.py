@@ -53,24 +53,27 @@ def update_email_address(uid, email):
     )
     return True
 
-def add_subscription_to_user(uid, amount):
+def add_subscription_to_user(uid, amount, payment_id):
   with engine.connect() as conn:
     subs_start = datetime.datetime.utcnow()
     subs_end = datetime.datetime.utcnow()
     if amount == 699:
       subs_end = subs_start + datetime.timedelta(days=28)
+      subscription = 'monthly'
     elif amount == 1999:
       subs_end = subs_start + datetime.timedelta(days=84)
+      subscription = 'quarterly'
     elif amount == 7999:
       subs_end = subs_start + datetime.timedelta(days=365)
-    subscription = 'active'
+      subscription = 'yearly'
     query = text("UPDATE users SET subs_start =:subs_start, subs_end =:subs_end, subscription =:subscription WHERE uid = :uid")
     conn.execute(query,
                  {
                   'uid': uid, 
                   'subs_start': subs_start, 
                   'subs_end': subs_end,
-                  'subscription': subscription
+                  'subscription': subscription,
+                  'payment_id': payment_id
                  }
     )
     return True

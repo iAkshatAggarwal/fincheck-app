@@ -199,7 +199,7 @@ def payment():
         username = session.get('username')
         email = session.get('email')
         #Update your application database
-        if add_subscription_to_user(user_id, amount): 
+        if add_subscription_to_user(user_id, amount,payment): 
           #send an email notification to the user
           msg = Message('FinCheck | Payment Successful', sender= os.environ.get('MAIL_USERNAME'), recipients=[email])
           msg.body = get_payment_success_msg(username,amount)
@@ -386,15 +386,27 @@ def show_sales(interval = "thisweek"):
       #For chart
       output = add_sales_by_dates(interval_sales) #adding amount for same dates 
       data = make_chart(output, 'date', 'sale_amt')
-      return render_template('sales.html',
-                             company=company,
-                             username=username,
-                             email=email,
-                             subs_end=subs_end,
-                             referral_code=referral_code,
-                             products = products,
-                             sales=interval_sales,
-                             data=data)
+      if len(products) == 0:
+        return render_template('sales.html',
+                               company=company,
+                               username=username,
+                               email=email,
+                               subs_end=subs_end,
+                               referral_code=referral_code,
+                               products=products,
+                               sales=sales,
+                               data=data,
+                               showModal=True)
+      else:
+        return render_template('sales.html',
+                               company=company,
+                               username=username,
+                               email=email,
+                               subs_end=subs_end,
+                               referral_code=referral_code,
+                               products=products,
+                               sales=interval_sales,
+                               data=data)
 
 @app.route("/add_sale", methods=["GET", "POST"])
 def add_sales():
@@ -456,6 +468,17 @@ def show_ledgers(interval="today"):
       interval_ledgers = extract_interval_data(ledgers, start_date, end_date)
       #For chart
       data = make_chart(result, 'wname', 'credit')
+      if wholesalers==[]:
+        return render_template('ledger.html',
+                             company=company,
+                             username=username,
+                             email=email,
+                             subs_end=subs_end,
+                             referral_code=referral_code,
+                             ledgers=interval_ledgers,
+                             wholesalers=wholesalers,
+                             data=data,
+                             showModal=True)
       return render_template('ledger.html',
                              company=company,
                              username=username,
@@ -491,8 +514,8 @@ def mod_led():
 
 #------------------------------- Wholesalers -------------------------------
 
-@app.route('/wholesalers/<interval>')
-def show_wholesalers(interval="today"):
+@app.route('/wholesalers')
+def show_wholesalers():
     user_id = session.get('user_id')
     company = session.get('company')
     username = session.get('username')
@@ -506,10 +529,6 @@ def show_wholesalers(interval="today"):
       ledgers = load_ledgers(user_id)
       wholesalers = load_wholesalers(user_id)
       result = get_latest_credits(ledgers)
-      # Assigning interval dates
-      start_date, end_date = get_interval_dates(interval, ledgers)
-      #Extract expenses data for given interval
-      interval_ledgers = extract_interval_data(ledgers, start_date, end_date)
       #For chart
       data = make_chart(result, 'wname', 'credit')
       return render_template('wholesalers.html',
@@ -518,7 +537,7 @@ def show_wholesalers(interval="today"):
                              email=email,
                              subs_end=subs_end,
                              referral_code=referral_code,
-                             ledgers=interval_ledgers,
+                             ledgers=ledgers,
                              wholesalers=wholesalers,
                              data=data)
 
@@ -644,6 +663,17 @@ def show_replacements(interval="today"):
       interval_replacements = extract_interval_data(replacements, start_date, end_date)
       #For chart
       data = make_chart(replacements, 'pname', 'qty')
+      if products==[]:
+        return render_template('replacements.html',
+                             company=company,
+                             username=username,
+                             email=email,
+                             subs_end=subs_end,
+                             referral_code=referral_code,
+                             products=products,
+                             replacements=interval_replacements,
+                             data=data,
+                             showModal=True)
       return render_template('replacements.html',
                              company=company,
                              username=username,

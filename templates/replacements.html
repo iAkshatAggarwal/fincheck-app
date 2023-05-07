@@ -7,9 +7,17 @@
       color: #2470dc;
     }
   </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 {% endblock %}
   
 {% block main %}
+  {% if showModal %}
+    <script>
+      $(window).on('load',function(){
+          $('#productsEmpty').modal('show');
+      });
+    </script>
+  {% endif %}
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Replacements vs Products</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
@@ -106,6 +114,24 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+  <!-- Modal for new user -->
+  <div class="modal fade" id="productsEmpty" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="productsEmptyLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="productsEmptyLabel">Add your products</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="fs-6">Hi {{username}}! <br/>We see you are ready to transform your business with FinCheck!<br/><br/>Currently your products list empty. First add some products which you will be going to sell.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <a type="button" class="btn btn-primary" href="/products">Understood</a>
+        </div>
       </div>
     </div>
   </div>
