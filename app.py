@@ -229,14 +229,14 @@ def dashboard(interval="today"):
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
-    elif subs_end is None or subs_end < utc_now: #If user has not subscribed
-        return render_template('altdash.html',
-                               company=company,
-                               username=username,
-                               email=email,
-                               subs_end=subs_end,
-                               referral_code=referral_code, 
-                               showModal=True)
+    # elif subs_end is None or subs_end < utc_now: #If user has not subscribed
+    #     return render_template('altdash.html',
+    #                            company=company,
+    #                            username=username,
+    #                            email=email,
+    #                            subs_end=subs_end,
+    #                            referral_code=referral_code, 
+    #                            showModal=True)
     else:
       # user is authenticated, render dashboard page
       sales = load_sales(user_id)
