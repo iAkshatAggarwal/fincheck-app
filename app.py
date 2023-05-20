@@ -229,14 +229,14 @@ def dashboard(interval="today"):
     if user_id is None:
         # user is not authenticated, redirect to login page
         return redirect(url_for('login'))
-    # elif subs_end is None or subs_end < utc_now: #If user has not subscribed
-    #     return render_template('altdash.html',
-    #                            company=company,
-    #                            username=username,
-    #                            email=email,
-    #                            subs_end=subs_end,
-    #                            referral_code=referral_code, 
-    #                            showModal=True)
+    elif subs_end is None or subs_end < utc_now: #If user has not subscribed
+        return render_template('altdash.html',
+                               company=company,
+                               username=username,
+                               email=email,
+                               subs_end=subs_end,
+                               referral_code=referral_code, 
+                               showModal=True)
     else:
       # user is authenticated, render dashboard page
       sales = load_sales(user_id)
@@ -548,12 +548,12 @@ def add_wsaler():
                   request.form["wcontact"],
                   request.form["waddress"],
                   user_id):
-      return redirect("/wholesalers/thisweek")
+      return redirect("/wholesalers")
 
 @app.route("/wholesalers/<wid>/delete")
 def del_ws(wid):
     if delete_wholesaler(wid):
-      return redirect("/wholesalers/thisweek")  
+      return redirect("/wholesalers")  
 
 @app.route("/wholesalers/update", methods=["GET", "POST"])
 def mod_ws():
@@ -562,7 +562,7 @@ def mod_ws():
                       request.form.get('wcontact'),
                       request.form.get('waddress'),
                       request.form.get('onboarded')):
-      return redirect('/wholesalers/thisweek')
+      return redirect('/wholesalers')
 
 #------------------------------- Expenses -------------------------------
 
