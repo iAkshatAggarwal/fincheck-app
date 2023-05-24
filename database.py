@@ -166,11 +166,12 @@ def delete_product(id):
     conn.execute(text("DELETE FROM product WHERE pid = :val"), {'val': id})
     return True
 
-def update_product(pname, pcp, psp, pqty):
+def update_product(pid, pname, pcp, psp, pqty):
   with engine.connect() as conn:
-    query = (text("UPDATE product SET pcp =:pcp, psp =:psp, pqty =:pqty WHERE pname = :pname"))
+    query = (text("UPDATE product SET pname =:pname, pcp =:pcp, psp =:psp, pqty =:pqty WHERE pid = :pid"))
     conn.execute(query,
                  {
+                  'pid': pid,
                   'pname': pname, 
                   'pcp': pcp, 
                   'psp': psp, 

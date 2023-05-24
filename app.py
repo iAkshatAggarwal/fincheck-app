@@ -127,6 +127,9 @@ def change_pass():
             session.clear()
             flash('Password changed successfully', 'success')
             return redirect("/login")
+        else:
+          flash('Passwords do not match! Try again', 'danger')
+          return redirect("/login")
       else:
         user_id = session.get('user_id')
         if request.form["old-pass"] == get_pass_from_uid(users, user_id) and request.form["new-pass"] == request.form["re-new-pass"]:
@@ -357,7 +360,8 @@ def del_prod(pid):
 
 @app.route("/products/update", methods=["GET", "POST"])
 def mod_prod():
-    if update_product(request.form.get('pname'),
+    if update_product(request.form.get('pid'),
+                      request.form.get('pname'),
                       request.form.get('pcp'),
                       request.form.get('psp'),
                       request.form.get('pqty')):
