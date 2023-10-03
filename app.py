@@ -5,7 +5,7 @@ import razorpay
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
 from utils import get_referral_code, authenticate_user, check_existing_user, get_pass_from_uid, get_subs_end, get_signup_otp_msg, get_payment_success_msg, get_update_email_msg, get_userid_from_email, check_email_in_users, get_forgot_pass_msg, get_interval_dates, make_chart, add_sales_by_dates , get_cogs, get_grevenue_gmargin, get_gexpenses, add_expenses_by_dates, add_expenses_by_category, group_sales_by_month, top_products, extract_interval_data, add_deleted_sale_qty_to_inventory, predict_sales, get_unpaid_customers, add_amt_unpaid_customers, get_latest_credits
-from database import add_user, change_password, update_email_address, add_subscription_to_user, load_users, load_inventory, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_wholesaler, delete_wholesaler, update_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
+from database import add_user, change_password, update_email_address, add_subscription_to_user, load_users, load_inventory, load_variants, load_sales, load_wholesalers, load_ledgers, load_expenses, load_replacements, add_product, delete_product, update_product, add_variant, delete_variant, update_variant, add_wholesaler, delete_wholesaler, update_wholesaler, add_ledger, delete_ledger, update_ledger, add_sale, delete_sale, update_sale, add_expense, delete_expense, update_expense, add_replacement, delete_replacement, update_replacement
 
 app = Flask(__name__)
 app.secret_key = os.environ['SECRET_KEY']
@@ -289,7 +289,7 @@ def dashboard(interval="today"):
       unpaid_customers_data = make_chart(unpaid_customers_output, 'customer', 'sale_amt')
       #For Wholesalers chart
       wholesaler_credits = get_latest_credits(ledgers)
-      wholesalers_data = make_chart(wholesaler_credits, 'wname', 'credit')
+      wholesalers_data = make_chart(wholesaler_credits, 'wname', 'balance')
       #Top Products
       top_products_qty, top_products_profit = top_products(sales)
       
@@ -332,6 +332,7 @@ def show_products():
         return redirect(url_for('login'))
     else:
       products = load_inventory(user_id)
+      variants = load_variants(user_id)
       #For chart
       data = make_chart(products, 'pname', 'pqty')
       return render_template('products.html',
@@ -341,16 +342,17 @@ def show_products():
                              email=email,
                              referral_code=referral_code,
                              products=products,
+                             variants=variants,
                              data=data)
 
 @app.route("/add_product", methods=["GET", "POST"])
 def add_prod():
     user_id = session.get('user_id')
     if add_product(request.form["pname"],
-                  request.form["pcp"],
-                  request.form["psp"],
-                  request.form["pqty"],
-                  user_id):
+                   request.form["pcp"],
+                   request.form["psp"],
+                   request.form["pqty"],
+                   user_id):
       return redirect("/products")
 
 @app.route("/products/<pid>/delete")
@@ -367,6 +369,34 @@ def mod_prod():
                       request.form.get('pqty')):
       return redirect('/products')
 
+#---------------------------- Variants -----------------------------------
+
+@app.route('/add_variant', methods=['GET', "POST"])
+def add_prod_variant():
+    user_id = session.get('user_id')
+    if user_id is None:
+        # user is not authenticated, redirect to login page
+        return redirect(url_for('login'))
+    else:
+      if add_variant(request.form.get('pid'),
+                     request.form.get('vname'),
+                     request.form.get('vqty'),
+                     user_id):
+        return redirect('/products')
+
+@app.route("/variants/<vid>/delete")
+def del_var(vid):
+    if delete_variant(vid):
+      return redirect("/products")
+
+@app.route("/variants/update", methods=["GET", "POST"])
+def mod_var():
+    user_id = session.get('user_id')
+    if update_variant(request.form.get('vid'),
+                      request.form.get('vname'),
+                      request.form.get('vqty'),
+                      user_id):
+      return redirect('/products')
 #------------------------------- Sales -------------------------------
 
 @app.route('/sales/<interval>')
@@ -383,6 +413,7 @@ def show_sales(interval = "thisweek"):
     else:
       sales = load_sales(user_id)
       products = load_inventory(user_id)
+      variants = load_variants(user_id)
       # Assigning interval dates
       start_date, end_date = get_interval_dates(interval, sales)
       #Extract Sales data for given interval
@@ -398,6 +429,7 @@ def show_sales(interval = "thisweek"):
                                subs_end=subs_end,
                                referral_code=referral_code,
                                products=products,
+                               variants=variants,
                                sales=sales,
                                data=data,
                                showModal=True)
@@ -409,6 +441,7 @@ def show_sales(interval = "thisweek"):
                                subs_end=subs_end,
                                referral_code=referral_code,
                                products=products,
+                               variants=variants,
                                sales=interval_sales,
                                data=data)
 
@@ -416,11 +449,13 @@ def show_sales(interval = "thisweek"):
 def add_sales():
     user_id = session.get('user_id')
     if add_sale(request.form["pname"],
-                  request.form["qty"],
-                  request.form["price"],
-                  request.form["customer"],
-                  request.form['status'],
-                  user_id):
+                request.form["vname"],
+                request.form["qty"],
+                request.form["price"],
+                request.form["customer"],
+                request.form['status'],
+                request.form['vid'],
+                user_id):
       return redirect("/sales/thisweek")
 
 @app.route("/sales/<id>/delete")
@@ -471,7 +506,7 @@ def show_ledgers(interval="today"):
       #Extract ledger data for given interval
       interval_ledgers = extract_interval_data(ledgers, start_date, end_date)
       #For chart
-      data = make_chart(result, 'wname', 'credit')
+      data = make_chart(result, 'wname', 'balance')
       if wholesalers==[]:
         return render_template('ledger.html',
                              company=company,

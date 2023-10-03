@@ -1,7 +1,7 @@
 import os
 import datetime
 from sqlalchemy import create_engine, text
-from utils import get_cp, get_pqty, calc_updated_sales
+from utils import get_cp, get_pid, get_pqty, get_pid_from_vid, get_tvqty, get_vqty, calc_updated_sales
 
 host = os.environ["HOST"]
 username =os.environ["USERNAME"]
@@ -89,7 +89,7 @@ def load_users():
     
 def load_inventory(uid):
   with engine.connect() as conn:
-    query = text("SELECT * from product WHERE uid = :uid")
+    query = text("SELECT * from product WHERE uid = :uid ORDER BY pname")
     result = conn.execute(query, {'uid': uid})
     products = []
     for row in result.fetchall():
@@ -97,6 +97,16 @@ def load_inventory(uid):
         products.append(row_dict)
     return products
 
+def load_variants(uid):
+  with engine.connect() as conn:
+    query = text("SELECT * from variants WHERE uid = :uid")
+    result = conn.execute(query, {'uid': uid})
+    variants = []
+    for row in result.fetchall():
+        row_dict = dict(zip(result.keys(), row))
+        variants.append(row_dict)
+    return variants
+    
 def load_sales(uid):
   with engine.connect() as conn:
     query = text("SELECT * from sales WHERE uid = :uid ORDER BY date DESC")
@@ -164,6 +174,7 @@ def add_product(pname, pcp, psp, pqty, uid):
 def delete_product(id):
   with engine.connect() as conn:
     conn.execute(text("DELETE FROM product WHERE pid = :val"), {'val': id})
+    conn.execute(text("DELETE FROM variants WHERE pid = :val"), {'val': id})
     return True
 
 def update_product(pid, pname, pcp, psp, pqty):
@@ -179,23 +190,68 @@ def update_product(pid, pname, pcp, psp, pqty):
                  }
     )
     return True
-    
+
+#------------------------------- Variants -------------------------------
+
+def add_variant(pid, vname, vqty, uid):
+  with engine.connect() as conn:
+    query = text("INSERT INTO variants(vname, vqty, pid, uid) VALUES (:vname, :vqty, :pid, :uid)")
+    conn.execute(query,
+                 {'vname': vname,
+                  'vqty': vqty,
+                  'pid': pid,
+                  'uid': uid
+                 }
+    )
+    return True
+
+def delete_variant(vid):
+  with engine.connect() as conn:
+    conn.execute(text("DELETE FROM variants WHERE vid = :vid"), {'vid': vid})
+    return True
+
+def update_variant(vid, vname, vqty, uid):
+  with engine.connect() as conn:
+    query1 = (text("UPDATE variants SET vname =:vname, vqty =:vqty WHERE vid = :vid"))
+    conn.execute(query1,
+                 {
+                  'vid': vid,
+                  'vname': vname, 
+                  'vqty': vqty
+                 }
+    )
+    print(vid)
+    variants = load_variants(uid)
+    pid = get_pid_from_vid(variants, vid)
+    print(pid)
+    pqty = get_tvqty(variants, pid)
+    print(pqty)
+    query2 = (text("UPDATE product SET pqty =:pqty WHERE pid = :pid"))
+    conn.execute(query2,
+                 {
+                  'pid': pid,
+                  'pqty': pqty
+                 }
+    )
+    return True
 #------------------------------- Sales -------------------------------
 
-def add_sale(pname, qty, price, customer, status, uid):
+def add_sale(pname, vname, qty, price, customer, status, vid, uid):
   with engine.connect() as conn:
-    #to get cp
+    #to get cp and id
     products = load_inventory(uid)
+    variants = load_variants(uid)
     amount = int(qty) * int(price)
+    pid = get_pid(products, pname)
     cp = get_cp(products, pname)
-    new_qty = get_pqty(products, pname) - int(qty) #updated qty of inventory
     profit = amount - (int(qty) * int(cp))
     if customer == "" and status == "Paid":
       customer = "CASH"
-    query= text("INSERT INTO sales(product, date, sale_qty, sale_price, sale_amt, sale_profit,  customer, status, uid) VALUES (:product, :date, :sale_qty, :sale_price, :sale_amt, :sale_profit, :customer, :status, :uid)")
+    query= text("INSERT INTO sales(product, variant, date, sale_qty, sale_price, sale_amt, sale_profit,  customer, status, uid) VALUES (:product, :variant, :date, :sale_qty, :sale_price, :sale_amt, :sale_profit, :customer, :status, :uid)")
     conn.execute(query,
                  {
                   'product': pname, 
+                  'variant': vname,
                   'date': datetime.datetime.now(), 
                   'sale_qty': qty, 
                   'sale_price': price,
@@ -206,10 +262,27 @@ def add_sale(pname, qty, price, customer, status, uid):
                   'uid': uid
                  }
     )
+    new_pqty = 0
+    if vid != "": #There exists variants of products
+      new_pqty = get_tvqty(variants, pid) - int(qty) #updated qty of inventory
+      print(pid, new_pqty)
+      new_vqty = get_vqty(variants, vid) - int(qty) #updated qty of variant
+      query3 = text("UPDATE variants SET vqty = :vqty  WHERE vid = :vid")
+      conn.execute(query3,
+                  {
+                    'vqty': new_vqty,
+                    'vid': vid
+                  }
+      )
+    
+    else:
+      new_pqty = get_pqty(products, pname) - int(qty) #updated qty of inventory
+
+    
     query2 = text("UPDATE product SET pqty = :pqty  WHERE pname = :pname")
     conn.execute(query2,
                 {
-                  'pqty': new_qty,
+                  'pqty': new_pqty,
                   'pname': pname
                 }
     )
@@ -295,24 +368,28 @@ def update_wholesaler(wid, wname, wcontact, waddress, onboarded):
 def add_ledger(wname, credit, debit, uid):
   with engine.connect() as conn:
     ledgers = load_ledgers(uid)
+    if credit == "":
+      credit = 0
+    elif debit == "":
+      debit = 0
+    for ledger in ledgers:
+        if ledger['wname'] != wname and debit == "":
+            balance = credit
     ledger_subset = [ledger for ledger in ledgers if ledger['wname'] == wname]
     if len(ledger_subset) > 0:
         latest_ledger = sorted(ledger_subset, key=lambda x: x['date'])[-1]
-        credit = latest_ledger['credit']
-        credit -= int(debit)
-    for ledger in ledgers:
-      if ledger['wname'] != wname and credit == "":
-        credit = 0
-    if debit == "":
-      debit = 0
+        balance = latest_ledger['balance']
+        balance += int(credit) - int(debit)
     
-    query = text("INSERT INTO ledger(wname, date, credit, debit, uid) VALUES (:wname, :date, :credit, :debit, :uid)")
+    
+    query = text("INSERT INTO ledger(wname, date, credit, debit, balance, uid) VALUES (:wname, :date, :credit, :debit, :balance, :uid)")
     conn.execute(query,
                  {
                   'wname': wname, 
                   'date': datetime.datetime.now(), 
                   'credit': credit, 
                   'debit': debit,
+                  'balance': balance,
                   'uid': uid
                  }
     )

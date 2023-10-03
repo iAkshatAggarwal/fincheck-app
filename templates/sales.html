@@ -60,33 +60,41 @@
   <!-- Add transaction form -->
   <form class="mb-5 mt-4" id="sale-form" action="/add_sale" method="POST">
     <div class="mx-auto row">
-      <div class="col-md-2">
-        <select id="option" name="pname" class="form-control">
-          {% for product in products %}
-          <option value="{{ product['pname'] }}">
-            {{ product['pname'] }}
-          </option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-2">
-          <input type="text" class="form-control" name="qty" id="quantity" placeholder="Quantity">
-      </div>
-      <div class="col-md-2">
-        <input type="text" class="form-control" name="price" id="price" placeholder="Price">
-      </div>
-      <div class="col-md-2">
-        <input type="text" class="form-control" name="customer" id="customer" placeholder="Customer Name">
-      </div>
-      <div class="col-md-1">
-        <select id="status" name="status" class="form-control">
-          <option value="Unpaid">Unpaid</option>
-          <option value="Paid">Paid</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <button class="btn btn-success" id="add-sale-button" type="submit">Add Sale</button>
-      </div>
+        <div class="col-md-2">
+            <select id="option" name="pname" class="form-control">
+                <option value="" disabled selected class="text-muted">Product</option>
+                {% for product in products %}
+                <option value="{{ product['pname'] }}">
+                    {{ product['pname'] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2" id="vname-container">
+            <select id="vname" name="vname" class="form-control">
+                <option value="None" selected>None</option>
+                <!-- Variant options will be populated dynamically -->
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control" name="qty" id="quantity" placeholder="Quantity">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control" name="price" id="price" placeholder="Price">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control" name="customer" id="customer" placeholder="Customer Name">
+        </div>
+        <div class="col-md-2">
+            <select id="status" name="status" class="form-control">
+                <option value="Unpaid">Unpaid</option>
+                <option value="Paid">Paid</option>
+            </select>
+        </div>
+        <input type="hidden" name="vid" id="vid">
+        <div class="col-md-12 mt-3">
+            <button class="btn btn-success" id="add-sale-button" type="submit">Add Sale</button>
+        </div>
     </div>
   </form>
   <div class="card mb-4 rounded-3 shadow-sm">
@@ -99,6 +107,7 @@
               <th scope="col">ID</th>
               <th scope="col">Date</th>
               <th scope="col">Product Name</th>
+              <th scope="col">Variant</th>
               <th scope="col">Quantity</th>
               <th scope="col">Price (INR)</th>
               <th scope="col">Amount (INR)</th>
@@ -115,6 +124,7 @@
               <td scope="col" contenteditable="false">{{loop.index}}</td>
               <td scope="col" contenteditable="false">{{sale['date']}}</td>
               <td scope="col" contenteditable="false">{{sale['product']}}</td>
+              <td scope="col" contenteditable="false">{{sale['variant']}}</td>
               <td scope="col" contenteditable="false">{{sale['sale_qty']}}</td>
               <td scope="col" contenteditable="false">{{sale['sale_price']}}</td>
               <td scope="col" contenteditable="false">{{sale['sale_amt']}}</td>
@@ -186,6 +196,89 @@
             }
         }
     });
+  </script>
+  <script>
+    // For displaying variants of products
+    const productSelect = document.getElementById('option');
+    const variantContainer = document.getElementById('vname-container');
+    const variantSelect = document.getElementById('vname');
+    const vidInput = document.getElementById('vid'); // Added this line to get the vid input field
+    
+    // Create a dictionary to map product IDs to their variants
+    const productVariants = {};
+    
+    // Initialize the productVariants dictionary with the variants for each product
+    {% for product in products %}
+    productVariants["{{ product['pname'] }}"] = [
+      {% for variant in variants %}
+      {% if variant['pid'] == product['pid'] %}
+      { name: '{{ variant['vname'] }}', id: '{{ variant['vid'] }}' }, // Store both name and id
+      {% endif %}
+      {% endfor %}
+    ];
+    {% endfor %}
+    
+    function updateVariantOptions() {
+      const selectedProduct = productSelect.value;
+      const variants = productVariants[selectedProduct];
+    
+      // Clear the current variant options
+      variantSelect.innerHTML = '';
+    
+      if (variants && variants.length > 0) {
+        // Populate the variant select with the filtered variants
+        variants.forEach(variantData => {
+          const option = document.createElement('option');
+          option.value = variantData.name;
+          option.textContent = variantData.name;
+          variantSelect.appendChild(option);
+        });
+    
+        // Show the variant container
+        variantContainer.style.display = 'block';
+    
+        // Set the vid in the hidden input field for the selected variant
+        const selectedVariant = variantSelect.value;
+        const selectedVariantData = variants.find(variantData => variantData.name === selectedVariant);
+        if (selectedVariantData) {
+          vidInput.value = selectedVariantData.id;
+        } else {
+          vidInput.value = ''; // Set to empty if no variant is selected
+        }
+      } else {
+        // If no variants, add a default "None" option and select it
+        const defaultOption = document.createElement('option');
+        defaultOption.value = 'None';
+        defaultOption.textContent = 'None';
+        variantSelect.appendChild(defaultOption);
+        variantSelect.value = 'None';
+    
+        // Hide the variant container
+        variantContainer.style.display = 'none';
+        vidInput.value = ''; // Set to empty if no variant is selected
+      }
+    }
+    
+    // Add event listener to update variants when product selection changes
+    productSelect.addEventListener('change', updateVariantOptions);
+    
+    // Add event listener to update vid when variant selection changes
+    variantSelect.addEventListener('change', function () {
+      const selectedVariant = this.value;
+      const selectedProduct = productSelect.value;
+      const variants = productVariants[selectedProduct];
+    
+      // Find the corresponding vid for the selected variant
+      const selectedVariantData = variants.find(variantData => variantData.name === selectedVariant);
+      if (selectedVariantData) {
+        vidInput.value = selectedVariantData.id;
+      } else {
+        vidInput.value = ''; // Set to empty if no variant is selected
+      }
+    });
+    
+    // Call updateVariantOptions initially to populate the variant options based on the initial product selection
+    updateVariantOptions();
   </script>
   <script src="/static/js/sales.js"></script>
 {% endblock %}

@@ -95,6 +95,7 @@
               <th scope="col">Transaction time</th>
               <th scope="col">Credit(INR)</th>
               <th scope="col">Debit(INR)</th>
+              <th scope="col">Balance(INR)</th>
             </tr>
           </thead>
           <tbody>
@@ -106,6 +107,7 @@
               <td scope="col" contenteditable="false">{{ledger['date']}}</td>
               <td scope="col" contenteditable="false">{{ledger['credit']}}</td>
               <td scope="col" contenteditable="false">{{ledger['debit']}}</td>
+              <td scope="col" contenteditable="false">{{ledger['balance']}}</td>
               <td>
                 <a class="btn btn-outline-primary" href="" role="button" onclick="editRow(this)">Update</a>
                 <a class="btn btn-outline-success d-none" href="" role="button" onclick="saveRow(this)">Save</a>
@@ -152,7 +154,7 @@
         data: {
             labels: data.labels,
             datasets: [{
-                label: 'Credits',
+                label: 'Balance',
                 data: data.values,
                 backgroundColor: 'rgba(150, 20, 20, 0.8)',
                 borderColor: 'rgba(150, 20, 20, 1)',

@@ -61,4 +61,3 @@ function deleteRow(button) {
     window.location.href = `/sales/${saleId}/delete?product=${encodeURIComponent(product)}&sale_qty=${encodeURIComponent(saleQty)}`;
   }
 }
-

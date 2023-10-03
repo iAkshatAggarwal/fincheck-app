@@ -179,10 +179,33 @@ def get_cp(products, pname):
             return product["pcp"]
     return None
 
+def get_pid(products, pname):
+    for product in products:
+        if product["pname"] == pname:
+            return product["pid"]
+
 def get_pqty(products, pname):
     for product in products:
         if product["pname"] == pname:
-            return product["pqty"]
+          return product["pqty"]
+    return 0
+
+def get_pid_from_vid(variants, vid):
+    for variant in variants:
+        if variant["vid"] == int(vid):
+            return variant["pid"]
+
+def get_tvqty(variants, pid):
+    total_pqty = 0
+    for variant in variants:
+        if variant['pid'] == pid:
+            total_pqty += variant['vqty']
+    return total_pqty
+          
+def get_vqty(variants, vid):
+    for variant in variants:
+        if variant["vid"] == int(vid):
+          return variant["vqty"]
     return None
 
 def calc_updated_sales(id, sales, sale_price, sale_amt, sale_profit, products, product, sale_qty):
@@ -263,10 +286,10 @@ def add_amt_unpaid_customers(sales):
 def get_latest_credits(ledgers):
     result = {}
     for ledger in sorted(ledgers, key=lambda x: x['date'], reverse=True):
-        wname, credit = ledger['wname'], ledger['credit']
+        wname, balance = ledger['wname'], ledger['balance']
         if wname not in result:
-            result[wname] = credit
-    return [{'wname': k, 'credit': v} for k, v in result.items()]
+            result[wname] = balance
+    return [{'wname': k, 'balance': v} for k, v in result.items()]
         
 # ------------------------------ Revenue Prediction ------------------------------
 
